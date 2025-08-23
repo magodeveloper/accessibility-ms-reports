@@ -51,22 +51,37 @@ Configura los archivos `.env.development` y `.env.production` para tus entornos:
 ASPNETCORE_ENVIRONMENT=Development
 ASPNETCORE_URLS=http://+:8083
 DB_NAME=reportsdb
-DB_USER=root
-DB_PASSWORD=yourpassword
+DB_USER=msuser
+DB_PASSWORD=RptApp2025SecurePass
+DB_ROOT_PASSWORD=cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiN
 API_HOST_PORT=8083
+DB_PORT=3309
 ```
 
 ```env
-# .env.production
+# .env.production - Cambiar passwords antes de usar en producción
 ASPNETCORE_ENVIRONMENT=Production
 ASPNETCORE_URLS=http://+:8083
-DB_NAME=reportsdb
-DB_USER=msuser
-DB_PASSWORD=prodpassword
+DB_NAME=reportsdb_prod
+DB_USER=msuser_prod
+DB_PASSWORD=RptApp2025SecurePassPROD
+DB_ROOT_PASSWORD=cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiNPROD
 API_HOST_PORT=8083
+DB_PORT=3309
+MYSQL_CHARSET=utf8mb4
+MYSQL_COLLATION=utf8mb4_unicode_ci
+ENABLE_SSL=true
 ```
 
-> **Nota:** No es necesario definir `DB_HOST` ni `DB_PORT` en los archivos `.env`, ya que la comunicación interna entre contenedores Docker utiliza el nombre del servicio (`reports-mysql`) y el puerto por defecto (`3306`).
+> **⚠️ Nota de Seguridad:** Los passwords mostrados son ejemplos para desarrollo. **CAMBIAR OBLIGATORIAMENTE** antes de usar en producción real.
+>
+> **📋 Variables Requeridas:**
+>
+> - `DB_ROOT_PASSWORD`: Password root de MySQL (32 caracteres seguros)
+> - `DB_PASSWORD`: Password del usuario de aplicación
+> - `DB_PORT`: Puerto externo para conectividad (3309 para Reports)
+>
+> **🔧 Comunicación Interna:** Los contenedores Docker usan el nombre del servicio (`mysql`) y puerto interno (`3306`) automáticamente.
 
 ## 🐳 Uso con Docker Compose
 
@@ -90,6 +105,34 @@ docker compose logs -f reports-api
 
 - .NET 9.0 SDK
 - MySQL Server (para desarrollo local sin Docker)
+
+## 🧪 Pruebas y Base de Datos de Test
+
+### Pruebas de Integración
+
+```bash
+# Ejecutar todas las pruebas
+dotnet test Reports.sln
+
+# Ejecutar pruebas con detalles
+dotnet test Reports.sln --verbosity normal
+```
+
+### Inicialización de Base de Datos de Test
+
+```powershell
+# Windows PowerShell
+.\init-test-databases.ps1
+
+# Linux/macOS
+./init-test-databases.sh
+```
+
+**Configuración de Test:**
+
+- **Root Password**: `fK7SP6bZYRMMbdB6azbrpPtX9gfGGZlQ`
+- **Test User**: `testuser` / `TestApp2025SecurePass`
+- **Bases de datos**: `usersdb_test`, `analysisdb_test`, `reportsdb_test`
 
 ### Compilación y Ejecución
 

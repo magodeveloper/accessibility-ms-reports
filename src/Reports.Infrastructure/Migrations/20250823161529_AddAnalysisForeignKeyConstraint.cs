@@ -10,36 +10,46 @@ namespace Reports.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Add cross-database foreign key constraint to reference analysisdb.ANALYSIS table
-            migrationBuilder.Sql(@"
-                ALTER TABLE REPORTS 
-                ADD CONSTRAINT fk_reports_analysis 
-                FOREIGN KEY (analysis_id) REFERENCES analysisdb.ANALYSIS(id) 
-                ON DELETE CASCADE;
-            ");
+            // COMMENTED OUT: Cross-database foreign key constraints don't work in Docker containers
+            // where each microservice has its own isolated database instance.
+            // Instead, we implement application-level validation through HTTP service communication.
 
-            // Add cross-database foreign key constraint for HISTORY table to reference analysisdb.ANALYSIS
-            migrationBuilder.Sql(@"
-                ALTER TABLE HISTORY 
-                ADD CONSTRAINT fk_history_analysis 
-                FOREIGN KEY (analysis_id) REFERENCES analysisdb.ANALYSIS(id) 
-                ON DELETE CASCADE;
-            ");
+            // ORIGINAL CODE (commented for Docker compatibility):
+            // migrationBuilder.Sql(@"
+            //     ALTER TABLE REPORTS 
+            //     ADD CONSTRAINT fk_reports_analysis 
+            //     FOREIGN KEY (analysis_id) REFERENCES analysisdb.ANALYSIS(id) 
+            //     ON DELETE CASCADE;
+            // ");
+
+            // migrationBuilder.Sql(@"
+            //     ALTER TABLE HISTORY 
+            //     ADD CONSTRAINT fk_history_analysis 
+            //     FOREIGN KEY (analysis_id) REFERENCES analysisdb.ANALYSIS(id) 
+            //     ON DELETE CASCADE;
+            // ");
+
+            // NOTE: Data integrity is now enforced at the application level through:
+            // 1. AnalysisValidationService - validates analysis_id exists via HTTP call to Analysis API
+            // 2. Service-to-service communication for data consistency
+            // 3. Application-level cascade operations if needed
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Drop the cross-database foreign key constraints
-            migrationBuilder.Sql(@"
-                ALTER TABLE REPORTS 
-                DROP FOREIGN KEY fk_reports_analysis;
-            ");
+            // COMMENTED OUT: No foreign keys to drop since we're using application-level validation
 
-            migrationBuilder.Sql(@"
-                ALTER TABLE HISTORY 
-                DROP FOREIGN KEY fk_history_analysis;
-            ");
+            // ORIGINAL CODE (commented for Docker compatibility):
+            // migrationBuilder.Sql(@"
+            //     ALTER TABLE REPORTS 
+            //     DROP FOREIGN KEY fk_reports_analysis;
+            // ");
+
+            // migrationBuilder.Sql(@"
+            //     ALTER TABLE HISTORY 
+            //     DROP FOREIGN KEY fk_history_analysis;
+            // ");
         }
     }
 }

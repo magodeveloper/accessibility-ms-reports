@@ -1,34 +1,35 @@
 services:
-  reports-mysql:
+  mysql:
     image: mysql:8.4
     container_name: msreports-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiN}
+      MYSQL_DATABASE: ${DB_NAME:-reportsdb}
+      MYSQL_USER: ${DB_USER:-msuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-RptApp2025SecurePass}
     ports:
-      - '${DB_PORT:-3309}:3309'
+      - '${DB_PORT:-3309}:3306'
     volumes:
       - msreports_mysql:/var/lib/mysql
+      - ./init-reports-db.sql:/docker-entrypoint-initdb.d/01-init-reports.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-p${DB_PASSWORD}']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-p${DB_ROOT_PASSWORD:-cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiN}']
       interval: 10s
       timeout: 5s
       retries: 10
 
-  reports-api:
+  api:
     image: msreports-api:latest
     build:
       context: .
       dockerfile: ./Dockerfile
     container_name: msreports-api
     depends_on:
-      reports-mysql:
+      mysql:
         condition: service_healthy
     environment:
-      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
-      ConnectionStrings__Default: 'server=reports-mysql;port=3306;database=${DB_NAME};user=${DB_USER};password=${DB_PASSWORD};TreatTinyAsBoolean=false'
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ConnectionStrings__Default: 'server=mysql;port=3306;database=${DB_NAME:-reportsdb};user=${DB_USER:-msuser};password=${DB_PASSWORD:-RptApp2025SecurePass};TreatTinyAsBoolean=false'
     ports:
       - '${API_HOST_PORT:-8083}:8083'
 
