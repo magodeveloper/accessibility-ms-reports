@@ -22,10 +22,10 @@ public class HistoryController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<HistoryDto>), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var result = await _service.GetAllAsync();
-        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        var lang = acceptLanguage?.Split(',')[0] ?? "es";
         if (result == null || !result.Any())
             return NotFound(new { message = Reports.Application.Localization.Get("Error_HistoryNotFound", lang) });
         return Ok(new { message = Reports.Application.Localization.Get("Success_HistoryList", lang), data = result });
@@ -40,12 +40,12 @@ public class HistoryController : ControllerBase
     [HttpGet("by-user/{userId}")]
     [ProducesResponseType(typeof(IEnumerable<HistoryDto>), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetByUserId(int userId)
+    public async Task<IActionResult> GetByUserId(int userId, [FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var result = await _service.GetByUserIdAsync(userId);
         if (result == null || !result.Any())
         {
-            var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+            var lang = acceptLanguage?.Split(',')[0] ?? "es";
             return NotFound(new { message = Reports.Application.Localization.Get("Error_HistoryNotFound", lang) });
         }
         return Ok(result);
@@ -60,12 +60,12 @@ public class HistoryController : ControllerBase
     [HttpGet("by-analysis/{analysisId}")]
     [ProducesResponseType(typeof(IEnumerable<HistoryDto>), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetByAnalysisId(int analysisId)
+    public async Task<IActionResult> GetByAnalysisId(int analysisId, [FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var result = await _service.GetByAnalysisIdAsync(analysisId);
         if (result == null || !result.Any())
         {
-            var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+            var lang = acceptLanguage?.Split(',')[0] ?? "es";
             return NotFound(new { message = Reports.Application.Localization.Get("Error_HistoryNotFound", lang) });
         }
         return Ok(result);
@@ -80,10 +80,10 @@ public class HistoryController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(HistoryDto), 200)]
     [ProducesResponseType(400)]
-    public async Task<IActionResult> Create([FromBody] HistoryDto dto)
+    public async Task<IActionResult> Create([FromBody] HistoryDto dto, [FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var created = await _service.CreateAsync(dto);
-        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        var lang = acceptLanguage?.Split(',')[0] ?? "es";
         return Ok(new { message = Reports.Application.Localization.Get("Success_HistoryCreated", lang), data = created });
     }
 
@@ -96,10 +96,10 @@ public class HistoryController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int id, [FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var deleted = await _service.DeleteAsync(id);
-        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        var lang = acceptLanguage?.Split(',')[0] ?? "es";
         if (deleted)
             return Ok(new { message = Reports.Application.Localization.Get("Success_HistoryDeleted", lang) });
         return NotFound(new { message = Reports.Application.Localization.Get("Error_HistoryNotFound", lang) });
@@ -113,10 +113,10 @@ public class HistoryController : ControllerBase
     [HttpDelete("all")]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> DeleteAll()
+    public async Task<IActionResult> DeleteAll([FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var deleted = await _service.DeleteAllAsync();
-        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        var lang = acceptLanguage?.Split(',')[0] ?? "es";
         if (deleted)
             return Ok(new { message = Reports.Application.Localization.Get("Success_AllHistoryDeleted", lang) });
         return NotFound(new { message = Reports.Application.Localization.Get("Error_HistoryNotFound", lang) });

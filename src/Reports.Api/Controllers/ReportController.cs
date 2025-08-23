@@ -23,10 +23,10 @@ public class ReportController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<ReportDto>), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var reports = await _service.GetAllAsync();
-        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        var lang = acceptLanguage?.Split(',')[0] ?? "es";
         if (reports == null || !reports.Any())
             return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
         return Ok(new { message = Reports.Application.Localization.Get("Success_ReportList", lang), data = reports });
@@ -41,12 +41,12 @@ public class ReportController : ControllerBase
     [HttpGet("by-analysis/{analysisId}")]
     [ProducesResponseType(typeof(IEnumerable<ReportDto>), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetByAnalysisId(int analysisId)
+    public async Task<IActionResult> GetByAnalysisId(int analysisId, [FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var reports = await _service.GetByAnalysisIdAsync(analysisId);
         if (reports == null || !reports.Any())
         {
-            var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+            var lang = acceptLanguage?.Split(',')[0] ?? "es";
             return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
         }
         return Ok(reports);
@@ -61,12 +61,12 @@ public class ReportController : ControllerBase
     [HttpGet("by-date/{date}")]
     [ProducesResponseType(typeof(IEnumerable<ReportDto>), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetByGenerationDate(DateTime date)
+    public async Task<IActionResult> GetByGenerationDate(DateTime date, [FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var reports = await _service.GetByGenerationDateAsync(date);
         if (reports == null || !reports.Any())
         {
-            var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+            var lang = acceptLanguage?.Split(',')[0] ?? "es";
             return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
         }
         return Ok(reports);
@@ -81,12 +81,12 @@ public class ReportController : ControllerBase
     [HttpGet("by-format/{format}")]
     [ProducesResponseType(typeof(IEnumerable<ReportDto>), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetByFormat(string format)
+    public async Task<IActionResult> GetByFormat(string format, [FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var reports = await _service.GetByFormatAsync(format);
         if (reports == null || !reports.Any())
         {
-            var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+            var lang = acceptLanguage?.Split(',')[0] ?? "es";
             return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
         }
         return Ok(reports);
@@ -101,10 +101,10 @@ public class ReportController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ReportDto), 200)]
     [ProducesResponseType(400)]
-    public async Task<IActionResult> Create([FromBody] ReportDto dto)
+    public async Task<IActionResult> Create([FromBody] ReportDto dto, [FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var created = await _service.CreateAsync(dto);
-        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        var lang = acceptLanguage?.Split(',')[0] ?? "es";
         return Ok(new { message = Reports.Application.Localization.Get("Success_ReportCreated", lang), data = created });
     }
 
@@ -117,10 +117,10 @@ public class ReportController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int id, [FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var deleted = await _service.DeleteAsync(id);
-        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        var lang = acceptLanguage?.Split(',')[0] ?? "es";
         if (deleted)
             return Ok(new { message = Reports.Application.Localization.Get("Success_ReportDeleted", lang) });
         return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
@@ -134,10 +134,10 @@ public class ReportController : ControllerBase
     [HttpDelete("all")]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> DeleteAll()
+    public async Task<IActionResult> DeleteAll([FromHeader(Name = "Accept-Language")] string acceptLanguage)
     {
         var deleted = await _service.DeleteAllAsync();
-        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        var lang = acceptLanguage?.Split(',')[0] ?? "es";
         if (deleted)
             return Ok(new { message = Reports.Application.Localization.Get("Success_AllReportsDeleted", lang) });
         return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
