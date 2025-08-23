@@ -10,6 +10,13 @@ public class ReportService : IReportService
     private readonly ReportsDbContext _db;
     public ReportService(ReportsDbContext db) => _db = db;
 
+    public async Task<IEnumerable<ReportDto>> GetAllAsync()
+    {
+        return await _db.Reports
+            .Select(r => ToDto(r))
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<ReportDto>> GetByAnalysisIdAsync(int analysisId)
     {
         return await _db.Reports
@@ -56,6 +63,15 @@ public class ReportService : IReportService
         var entity = await _db.Reports.FindAsync(id);
         if (entity == null) return false;
         _db.Reports.Remove(entity);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteAllAsync()
+    {
+        var entities = await _db.Reports.ToListAsync();
+        if (!entities.Any()) return false;
+        _db.Reports.RemoveRange(entities);
         await _db.SaveChangesAsync();
         return true;
     }

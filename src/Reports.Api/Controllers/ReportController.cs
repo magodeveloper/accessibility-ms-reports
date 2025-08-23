@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Reports.Application.Dtos;
-using Microsoft.Extensions.Localization;
 using Reports.Application.Services.Report;
 
 namespace Reports.Api.Controllers;
@@ -11,11 +10,26 @@ namespace Reports.Api.Controllers;
 public class ReportController : ControllerBase
 {
     private readonly IReportService _service;
-    private readonly IStringLocalizer<ReportController> _localizer;
-    public ReportController(IReportService service, IStringLocalizer<ReportController> localizer)
+    public ReportController(IReportService service)
     {
         _service = service;
-        _localizer = localizer;
+    }
+
+    /// <summary>
+    /// Obtiene todos los informes.
+    /// </summary>
+    /// <response code="200">Lista completa de informes</response>
+    /// <response code="404">No se encontraron informes</response>
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<ReportDto>), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetAll()
+    {
+        var reports = await _service.GetAllAsync();
+        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        if (reports == null || !reports.Any())
+            return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+        return Ok(new { message = Reports.Application.Localization.Get("Success_ReportList", lang), data = reports });
     }
 
     /// <summary>
@@ -31,7 +45,10 @@ public class ReportController : ControllerBase
     {
         var reports = await _service.GetByAnalysisIdAsync(analysisId);
         if (reports == null || !reports.Any())
-            return NotFound(new { message = _localizer["Error_ReportNotFound"] });
+        {
+            var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+            return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+        }
         return Ok(reports);
     }
 
@@ -48,7 +65,10 @@ public class ReportController : ControllerBase
     {
         var reports = await _service.GetByGenerationDateAsync(date);
         if (reports == null || !reports.Any())
-            return NotFound(new { message = _localizer["Error_ReportNotFound"] });
+        {
+            var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+            return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+        }
         return Ok(reports);
     }
 
@@ -65,7 +85,10 @@ public class ReportController : ControllerBase
     {
         var reports = await _service.GetByFormatAsync(format);
         if (reports == null || !reports.Any())
-            return NotFound(new { message = _localizer["Error_ReportNotFound"] });
+        {
+            var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+            return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+        }
         return Ok(reports);
     }
 
@@ -81,7 +104,8 @@ public class ReportController : ControllerBase
     public async Task<IActionResult> Create([FromBody] ReportDto dto)
     {
         var created = await _service.CreateAsync(dto);
-        return Ok(new { message = _localizer["Success_ReportCreated"], data = created });
+        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        return Ok(new { message = Reports.Application.Localization.Get("Success_ReportCreated", lang), data = created });
     }
 
     /// <summary>
@@ -96,8 +120,26 @@ public class ReportController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _service.DeleteAsync(id);
+        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
         if (deleted)
-            return Ok(new { message = _localizer["Success_ReportDeleted"] });
-        return NotFound(new { message = _localizer["Error_ReportNotFound"] });
+            return Ok(new { message = Reports.Application.Localization.Get("Success_ReportDeleted", lang) });
+        return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+    }
+
+    /// <summary>
+    /// Elimina todos los informes.
+    /// </summary>
+    /// <response code="200">Todos los informes eliminados exitosamente</response>
+    /// <response code="404">No se encontraron informes para eliminar</response>
+    [HttpDelete("all")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> DeleteAll()
+    {
+        var deleted = await _service.DeleteAllAsync();
+        var lang = Request.Headers["Accept-Language"].FirstOrDefault()?.Split(',')[0] ?? "es";
+        if (deleted)
+            return Ok(new { message = Reports.Application.Localization.Get("Success_AllReportsDeleted", lang) });
+        return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
     }
 }

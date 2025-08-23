@@ -10,6 +10,12 @@ public class HistoryService : IHistoryService
     private readonly ReportsDbContext _db;
     public HistoryService(ReportsDbContext db) => _db = db;
 
+    public async Task<IEnumerable<HistoryDto>> GetAllAsync()
+    {
+        return await _db.History
+            .Select(h => ToDto(h)).ToListAsync();
+    }
+
     public async Task<IEnumerable<HistoryDto>> GetByUserIdAsync(int userId)
     {
         return await _db.History.Where(h => h.UserId == userId)
@@ -42,6 +48,15 @@ public class HistoryService : IHistoryService
         var entity = await _db.History.FindAsync(id);
         if (entity == null) return false;
         _db.History.Remove(entity);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteAllAsync()
+    {
+        var entities = await _db.History.ToListAsync();
+        if (!entities.Any()) return false;
+        _db.History.RemoveRange(entities);
         await _db.SaveChangesAsync();
         return true;
     }

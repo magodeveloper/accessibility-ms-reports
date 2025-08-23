@@ -5,7 +5,9 @@
   "Success_ReportCreated": "Reporte creado exitosamente.",
   "Success_ReportDeleted": "Reporte eliminado exitosamente.",
   "Success_ReportList": "Lista de reportes obtenida exitosamente.",
+  "Success_AllReportsDeleted": "Todos los reportes eliminados exitosamente.",
   "Success_HistoryCreated": "Registro de historial creado exitosamente.",
   "Success_HistoryDeleted": "Registro de historial eliminado exitosamente.",
-  "Success_HistoryList": "Lista de historial obtenida exitosamente."
+  "Success_HistoryList": "Lista de historial obtenida exitosamente.",
+  "Success_AllHistoryDeleted": "Todos los registros de historial eliminados exitosamente."
 }

@@ -26,6 +26,13 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
     }
 
     [Fact]
+    public async Task GetAllReports_WhenEmpty_NotFound()
+    {
+        var response = await _client.GetAsync("/api/report");
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task GetByDate_NotFound()
     {
         var date = "2099-01-01";
@@ -69,9 +76,27 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
     }
 
     [Fact]
+    public async Task DeleteAllReports_WhenEmpty_NotFound()
+    {
+        // First, ensure we delete any existing reports
+        await _client.DeleteAsync("/api/report/all");
+
+        // Now try to delete all when empty
+        var response = await _client.DeleteAsync("/api/report/all");
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task GetHistoryByUser_NotFound()
     {
         var response = await _client.GetAsync("/api/history/by-user/9999");
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetAllHistory_WhenEmpty_NotFound()
+    {
+        var response = await _client.GetAsync("/api/history");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -106,6 +131,103 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
     {
         var response = await _client.DeleteAsync("/api/history/9999");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task DeleteAllHistory_WhenEmpty_NotFound()
+    {
+        // First, ensure we delete any existing history records
+        await _client.DeleteAsync("/api/history/all");
+
+        // Now try to delete all when empty
+        var response = await _client.DeleteAsync("/api/history/all");
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetAllReports_AfterCreate_Success()
+    {
+        // Create a report first
+        var dto = new ReportDto
+        {
+            AnalysisId = 1,
+            Format = "PDF",
+            FilePath = "test-getall.pdf",
+            GenerationDate = DateTime.UtcNow
+        };
+        var createResp = await _client.PostAsJsonAsync("/api/report", dto);
+        createResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Get all reports
+        var getAllResp = await _client.GetAsync("/api/report");
+        getAllResp.StatusCode.Should().Be(HttpStatusCode.OK);
+        var allReports = await getAllResp.Content.ReadFromJsonAsync<ResponseWithData<IEnumerable<ReportDto>>>();
+        allReports.Should().NotBeNull();
+        allReports!.data.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task DeleteAllReports_AfterCreate_Success()
+    {
+        // Create a report first
+        var dto = new ReportDto
+        {
+            AnalysisId = 2,
+            Format = "HTML",
+            FilePath = "test-deleteall.html",
+            GenerationDate = DateTime.UtcNow
+        };
+        var createResp = await _client.PostAsJsonAsync("/api/report", dto);
+        createResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Delete all reports
+        var deleteAllResp = await _client.DeleteAsync("/api/report/all");
+        deleteAllResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Verify all reports are deleted
+        var getAllResp = await _client.GetAsync("/api/report");
+        getAllResp.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetAllHistory_AfterCreate_Success()
+    {
+        // Create a history record first
+        var dto = new HistoryDto
+        {
+            UserId = 2,
+            AnalysisId = 2
+        };
+        var createResp = await _client.PostAsJsonAsync("/api/history", dto);
+        createResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Get all history
+        var getAllResp = await _client.GetAsync("/api/history");
+        getAllResp.StatusCode.Should().Be(HttpStatusCode.OK);
+        var allHistory = await getAllResp.Content.ReadFromJsonAsync<ResponseWithData<IEnumerable<HistoryDto>>>();
+        allHistory.Should().NotBeNull();
+        allHistory!.data.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task DeleteAllHistory_AfterCreate_Success()
+    {
+        // Create a history record first
+        var dto = new HistoryDto
+        {
+            UserId = 3,
+            AnalysisId = 3
+        };
+        var createResp = await _client.PostAsJsonAsync("/api/history", dto);
+        createResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Delete all history
+        var deleteAllResp = await _client.DeleteAsync("/api/history/all");
+        deleteAllResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Verify all history is deleted
+        var getAllResp = await _client.GetAsync("/api/history");
+        getAllResp.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     private class ResponseWithData<T>
