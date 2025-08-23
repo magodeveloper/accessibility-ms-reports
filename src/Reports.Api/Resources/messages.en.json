@@ -1,0 +1,11 @@
+{
+  "Error_ReportNotFound": "Report not found.",
+  "Error_HistoryNotFound": "History not found.",
+  "Error_InternalServer": "An unexpected internal error has occurred.",
+  "Success_ReportCreated": "Report created successfully.",
+  "Success_ReportDeleted": "Report deleted successfully.",
+  "Success_ReportList": "Report list retrieved successfully.",
+  "Success_HistoryCreated": "History record created successfully.",
+  "Success_HistoryDeleted": "History record deleted successfully.",
+  "Success_HistoryList": "History list retrieved successfully."
+}

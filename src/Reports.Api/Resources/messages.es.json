@@ -1,0 +1,11 @@
+{
+  "Error_ReportNotFound": "Reporte no encontrado.",
+  "Error_HistoryNotFound": "Historial no encontrado.",
+  "Error_InternalServer": "Ha ocurrido un error interno inesperado.",
+  "Success_ReportCreated": "Reporte creado exitosamente.",
+  "Success_ReportDeleted": "Reporte eliminado exitosamente.",
+  "Success_ReportList": "Lista de reportes obtenida exitosamente.",
+  "Success_HistoryCreated": "Registro de historial creado exitosamente.",
+  "Success_HistoryDeleted": "Registro de historial eliminado exitosamente.",
+  "Success_HistoryList": "Lista de historial obtenida exitosamente."
+}

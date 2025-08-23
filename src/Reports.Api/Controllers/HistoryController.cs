@@ -1,0 +1,85 @@
+using Microsoft.AspNetCore.Mvc;
+using Reports.Application.Dtos;
+using Microsoft.Extensions.Localization;
+using Reports.Application.Services.History;
+
+namespace Reports.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class HistoryController : ControllerBase
+{
+    private readonly IHistoryService _service;
+    private readonly IStringLocalizer<HistoryController> _localizer;
+    public HistoryController(IHistoryService service, IStringLocalizer<HistoryController> localizer)
+    {
+        _service = service;
+        _localizer = localizer;
+    }
+
+    /// <summary>
+    /// Obtiene el historial por ID de usuario.
+    /// </summary>
+    /// <param name="userId">ID del usuario</param>
+    /// <response code="200">Lista de historial encontrada</response>
+    /// <response code="404">No se encontró historial para el usuario</response>
+    [HttpGet("by-user/{userId}")]
+    [ProducesResponseType(typeof(IEnumerable<HistoryDto>), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetByUserId(int userId)
+    {
+        var result = await _service.GetByUserIdAsync(userId);
+        if (result == null || !result.Any())
+            return NotFound(new { message = _localizer["Error_HistoryNotFound"] });
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Obtiene el historial por ID de análisis.
+    /// </summary>
+    /// <param name="analysisId">ID del análisis</param>
+    /// <response code="200">Lista de historial encontrada</response>
+    /// <response code="404">No se encontró historial para el análisis</response>
+    [HttpGet("by-analysis/{analysisId}")]
+    [ProducesResponseType(typeof(IEnumerable<HistoryDto>), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetByAnalysisId(int analysisId)
+    {
+        var result = await _service.GetByAnalysisIdAsync(analysisId);
+        if (result == null || !result.Any())
+            return NotFound(new { message = _localizer["Error_HistoryNotFound"] });
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Crea un nuevo historial.
+    /// </summary>
+    /// <param name="dto">Datos del historial a crear</param>
+    /// <response code="200">Historial creado exitosamente</response>
+    /// <response code="400">Datos inválidos</response>    
+    [HttpPost]
+    [ProducesResponseType(typeof(HistoryDto), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> Create([FromBody] HistoryDto dto)
+    {
+        var created = await _service.CreateAsync(dto);
+        return Ok(new { message = _localizer["Success_HistoryCreated"], data = created });
+    }
+
+    /// <summary>
+    /// Elimina un historial por ID.
+    /// </summary>
+    /// <param name="id">ID del historial a eliminar</param>
+    /// <response code="200">Historial eliminado exitosamente</response>
+    /// <response code="404">No se encontró historial para el ID proporcionado</response>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var deleted = await _service.DeleteAsync(id);
+        if (deleted)
+            return Ok(new { message = _localizer["Success_HistoryDeleted"] });
+        return NotFound(new { message = _localizer["Error_HistoryNotFound"] });
+    }
+}
