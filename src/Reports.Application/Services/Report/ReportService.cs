@@ -46,7 +46,7 @@ public class ReportService : IReportService
         var entity = new Reports.Domain.Entities.Report
         {
             AnalysisId = dto.AnalysisId,
-            Format = Enum.Parse<ReportFormat>(dto.Format, true),
+            Format = dto.Format, // Ya es ReportFormat, no necesita conversión
             FilePath = dto.FilePath,
             GenerationDate = dto.GenerationDate,
             CreatedAt = DateTime.UtcNow,
@@ -80,7 +80,7 @@ public class ReportService : IReportService
     {
         Id = r.Id,
         AnalysisId = r.AnalysisId,
-        Format = r.Format.ToString(),
+        Format = r.Format, // Usar directamente el enum
         FilePath = r.FilePath,
         GenerationDate = r.GenerationDate,
         CreatedAt = r.CreatedAt,

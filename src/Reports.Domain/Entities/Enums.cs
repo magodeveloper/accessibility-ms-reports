@@ -1,5 +1,16 @@
+using System.Text.Json.Serialization;
+
 namespace Reports.Domain.Entities
 {
     public enum ReportFormat
-    { Pdf, Html, Json, Excel }
+    {
+        [JsonStringEnumMemberName("pdf")]
+        Pdf,
+        [JsonStringEnumMemberName("html")]
+        Html,
+        [JsonStringEnumMemberName("json")]
+        Json,
+        [JsonStringEnumMemberName("excel")]
+        Excel
+    }
 }
