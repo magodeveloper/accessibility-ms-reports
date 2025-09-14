@@ -3,6 +3,7 @@ using System.Net;
 using FluentAssertions;
 using System.Net.Http.Json;
 using Reports.Application.Dtos;
+using Reports.Domain.Entities;
 using Reports.Tests.Infrastructure;
 
 namespace Reports.Tests;
@@ -53,7 +54,7 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
         var dto = new ReportDto
         {
             AnalysisId = 1,
-            Format = "PDF",
+            Format = ReportFormat.Pdf,
             FilePath = "test.pdf",
             GenerationDate = DateTime.UtcNow
         };
@@ -151,7 +152,7 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
         var dto = new ReportDto
         {
             AnalysisId = 1,
-            Format = "PDF",
+            Format = ReportFormat.Pdf,
             FilePath = "test-getall.pdf",
             GenerationDate = DateTime.UtcNow
         };
@@ -173,7 +174,7 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
         var dto = new ReportDto
         {
             AnalysisId = 2,
-            Format = "HTML",
+            Format = ReportFormat.Html,
             FilePath = "test-deleteall.html",
             GenerationDate = DateTime.UtcNow
         };

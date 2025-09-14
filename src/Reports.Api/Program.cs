@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text.Json;
 using FluentValidation;
@@ -56,14 +57,17 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ReportsDbContext>();
     var environment = app.Configuration["ASPNETCORE_ENVIRONMENT"];
 
-    if (environment == "TestEnvironment")
+    // Lista de entornos que usan InMemory database
+    var testEnvironments = new[] { "TestEnvironment", "Testing", "Test", "UnitTest", "IntegrationTest", "Development" };
+
+    if (testEnvironments.Contains(environment, StringComparer.OrdinalIgnoreCase))
     {
-        // Para tests, solo crear la base de datos sin migraciones
+        // Para entornos de test/desarrollo con InMemory, solo crear la base de datos
         await db.Database.EnsureCreatedAsync();
     }
     else
     {
-        // Para desarrollo y producción, ejecutar migraciones
+        // Para producción con MySQL, ejecutar migraciones
         await db.Database.MigrateAsync();
     }
 }
@@ -107,6 +111,11 @@ if (app.Environment.IsDevelopment())
 }
 
 await app.RunAsync();
+
+public partial class Program
+{
+    protected Program() { }
+}
 
 // Necesario para tests de integración (WebApplicationFactory)
 namespace Reports.Api

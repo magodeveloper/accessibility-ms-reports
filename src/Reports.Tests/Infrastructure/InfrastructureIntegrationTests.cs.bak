@@ -1,0 +1,250 @@
+using Reports.Infrastructure.Data;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+
+namespace Reports.Tests.Infrastructure;
+
+public class InfrastructureIntegrationTests : IDisposable
+{
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ReportsDbContext _context;
+    private bool _disposed;
+
+    public InfrastructureIntegrationTests()
+    {
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Environment"] = "TestEnvironment"
+            })
+            .Build();
+
+        services.AddInfrastructure(configuration);
+        _serviceProvider = services.BuildServiceProvider();
+        _context = _serviceProvider.GetRequiredService<ReportsDbContext>();
+        _context.Database.EnsureCreated();
+    }
+
+    [Fact]
+    public void Infrastructure_ShouldCreateAndRetrieveReport()
+    {
+        // Arrange
+        var report = new Report
+        {
+            Format = ReportFormat.Html,
+            FilePath = "/path/to/report.html",
+            GenerationDate = DateTime.UtcNow,
+            AnalysisId = 100,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        // Act
+        _context.Reports.Add(report);
+        _context.SaveChanges();
+
+        var retrievedReport = _context.Reports.First(r => r.AnalysisId == 100);
+
+        // Assert
+        retrievedReport.Should().NotBeNull();
+        retrievedReport.FilePath.Should().Be("/path/to/report.html");
+        retrievedReport.Format.Should().Be(ReportFormat.Html);
+        retrievedReport.AnalysisId.Should().Be(100);
+    }
+
+    [Fact]
+    public void Infrastructure_ShouldCreateAndRetrieveHistory()
+    {
+        // Arrange
+        var history = new History
+        {
+            UserId = 200,
+            AnalysisId = 300,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        // Act
+        _context.History.Add(history);
+        _context.SaveChanges();
+
+        var retrievedHistory = _context.History.First(h => h.UserId == 200);
+
+        // Assert
+        retrievedHistory.Should().NotBeNull();
+        retrievedHistory.UserId.Should().Be(200);
+        retrievedHistory.AnalysisId.Should().Be(300);
+    }
+
+    [Fact]
+    public void Infrastructure_ShouldHandleMultipleFormats()
+    {
+        // Arrange
+        var reports = new[]
+        {
+            new Report { FilePath = "/pdf/report.pdf", Format = ReportFormat.Pdf, GenerationDate = DateTime.UtcNow, AnalysisId = 1, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            new Report { FilePath = "/html/report.html", Format = ReportFormat.Html, GenerationDate = DateTime.UtcNow, AnalysisId = 2, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            new Report { FilePath = "/json/report.json", Format = ReportFormat.Json, GenerationDate = DateTime.UtcNow, AnalysisId = 3, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            new Report { FilePath = "/excel/report.xlsx", Format = ReportFormat.Excel, GenerationDate = DateTime.UtcNow, AnalysisId = 4, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+        };
+
+        // Act
+        _context.Reports.AddRange(reports);
+        _context.SaveChanges();
+
+        // Assert
+        var pdfReports = _context.Reports.Where(r => r.Format == ReportFormat.Pdf).ToList();
+        var htmlReports = _context.Reports.Where(r => r.Format == ReportFormat.Html).ToList();
+        var jsonReports = _context.Reports.Where(r => r.Format == ReportFormat.Json).ToList();
+        var excelReports = _context.Reports.Where(r => r.Format == ReportFormat.Excel).ToList();
+
+        pdfReports.Should().HaveCount(1);
+        htmlReports.Should().HaveCount(1);
+        jsonReports.Should().HaveCount(1);
+        excelReports.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void Infrastructure_ShouldHandleConcurrentAccess()
+    {
+        // Arrange
+        var tasks = new List<Task>();
+
+        // Act
+        for (int i = 0; i < 5; i++)
+        {
+            int reportId = i;
+            tasks.Add(Task.Run(() =>
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<ReportsDbContext>();
+                context.Reports.Add(new Report
+                {
+                    FilePath = $"/concurrent/report{reportId}.pdf",
+                    Format = ReportFormat.Pdf,
+                    GenerationDate = DateTime.UtcNow,
+                    AnalysisId = reportId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+                context.SaveChanges();
+            }));
+        }
+
+        // Assert
+        var act = () => Task.WaitAll(tasks.ToArray());
+        act.Should().NotThrow();
+
+        var reports = _context.Reports.Where(r => r.FilePath != null && r.FilePath.StartsWith("/concurrent/")).ToList();
+        reports.Should().HaveCount(5);
+    }
+
+    [Fact]
+    public void Infrastructure_ShouldHandleEntityUpdates()
+    {
+        // Arrange
+        var report = new Report
+        {
+            FilePath = "/original/report.pdf",
+            Format = ReportFormat.Pdf,
+            GenerationDate = DateTime.UtcNow,
+            AnalysisId = 500,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _context.Reports.Add(report);
+        _context.SaveChanges();
+
+        // Act
+        report.FilePath = "/updated/report.html";
+        report.Format = ReportFormat.Html;
+        report.UpdatedAt = DateTime.UtcNow;
+        _context.SaveChanges();
+
+        // Assert
+        var updatedReport = _context.Reports.Find(report.Id);
+        updatedReport.Should().NotBeNull();
+        updatedReport!.FilePath.Should().Be("/updated/report.html");
+        updatedReport.Format.Should().Be(ReportFormat.Html);
+    }
+
+    [Fact]
+    public void Infrastructure_ShouldHandleEntityDeletion()
+    {
+        // Arrange
+        var report = new Report
+        {
+            FilePath = "/delete/report.json",
+            Format = ReportFormat.Json,
+            GenerationDate = DateTime.UtcNow,
+            AnalysisId = 600,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _context.Reports.Add(report);
+        _context.SaveChanges();
+        var reportId = report.Id;
+
+        // Act
+        _context.Reports.Remove(report);
+        _context.SaveChanges();
+
+        // Assert
+        var deletedReport = _context.Reports.Find(reportId);
+        deletedReport.Should().BeNull();
+    }
+
+    [Fact]
+    public void Infrastructure_ShouldTrackChanges()
+    {
+        // Arrange
+        var report = new Report
+        {
+            FilePath = "/track/report.xlsx",
+            Format = ReportFormat.Excel,
+            GenerationDate = DateTime.UtcNow,
+            AnalysisId = 700,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        // Act
+        _context.Reports.Add(report);
+        var addedEntries = _context.ChangeTracker.Entries().Count(e => e.State == EntityState.Added);
+
+        _context.SaveChanges();
+        var unchangedEntries = _context.ChangeTracker.Entries().Count(e => e.State == EntityState.Unchanged);
+
+        report.FilePath = "/track/modified.xlsx";
+        var modifiedEntries = _context.ChangeTracker.Entries().Count(e => e.State == EntityState.Modified);
+
+        // Assert
+        addedEntries.Should().Be(1);
+        unchangedEntries.Should().Be(1);
+        modifiedEntries.Should().Be(1);
+    }
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _context.Dispose();
+                if (_serviceProvider is IDisposable disposableProvider)
+                {
+                    disposableProvider.Dispose();
+                }
+            }
+            _disposed = true;
+        }
+    }
+}

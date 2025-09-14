@@ -34,11 +34,33 @@ public class ReportService : IReportService
 
     public async Task<IEnumerable<ReportDto>> GetByFormatAsync(string format)
     {
-        if (!Enum.TryParse<ReportFormat>(format, true, out var enumFormat))
-            return new List<ReportDto>();
-        return await _db.Reports
-            .Where(r => r.Format == enumFormat)
-            .Select(r => ToDto(r)).ToListAsync();
+        // Primero intentar con el nombre del enum (Excel, Html, Json, Pdf)
+        if (Enum.TryParse<ReportFormat>(format, true, out var enumFormat))
+        {
+            return await _db.Reports
+                .Where(r => r.Format == enumFormat)
+                .Select(r => ToDto(r)).ToListAsync();
+        }
+
+        // Si no funciona, intentar con los valores JSON (excel, html, json, pdf)
+        var lowerFormat = format.ToLower();
+        var jsonEnumFormat = lowerFormat switch
+        {
+            "pdf" => ReportFormat.Pdf,
+            "html" => ReportFormat.Html,
+            "json" => ReportFormat.Json,
+            "excel" => ReportFormat.Excel,
+            _ => (ReportFormat?)null
+        };
+
+        if (jsonEnumFormat.HasValue)
+        {
+            return await _db.Reports
+                .Where(r => r.Format == jsonEnumFormat.Value)
+                .Select(r => ToDto(r)).ToListAsync();
+        }
+
+        return new List<ReportDto>();
     }
 
     public async Task<ReportDto> CreateAsync(ReportDto dto)
@@ -81,7 +103,7 @@ public class ReportService : IReportService
         Id = r.Id,
         AnalysisId = r.AnalysisId,
         Format = r.Format, // Usar directamente el enum
-        FilePath = r.FilePath,
+        FilePath = r.FilePath ?? string.Empty, // Manejar null apropiadamente
         GenerationDate = r.GenerationDate,
         CreatedAt = r.CreatedAt,
         UpdatedAt = r.UpdatedAt

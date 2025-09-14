@@ -17,14 +17,44 @@
 
 ---
 
-## 🧭 Navegación rápida
+## 📋 Tabla de contenidos
+
+### 🚀 **Inicio rápido**
 
 - [🏗️ Estructura del proyecto](#️-estructura-del-proyecto)
 - [📊 Enumeraciones y catálogos](#-enumeraciones-y-catálogos)
 - [⚙️ Configuración de entornos](#️-configuración-de-entornos)
+
+### 💾 **Base de datos**
+
 - [🗄️ Base de datos y arquitectura](#️-base-de-datos-y-arquitectura)
-- [🌐 API endpoints y ejemplos](#-api-endpoints-y-ejemplos)
-- [🐳 Despliegue y containerización](#-despliegue-y-containerización)
+- [🔄 Gestión de migraciones](#-gestión-de-migraciones)
+- [🧪 Base de datos de test](#-base-de-datos-de-test)
+
+### 🌐 **API y desarrollo**
+
+- [📊 Endpoints de reportes](#-endpoints-de-reportes)
+- [📈 Endpoints de historial](#-endpoints-de-historial)
+- [📝 Ejemplos de uso completo](#-ejemplos-de-uso-completo)
+- [🔍 Consultas avanzadas](#-consultas-avanzadas)
+- [� Manejo de errores](#-manejo-de-errores-y-respuestas)
+
+### �🐳 **Despliegue y operaciones**
+
+- [🐳 Configuración de Docker](#-configuración-de-docker)
+- [📊 Monitoreo y métricas](#-monitoreo-y-métricas)
+- [🔗 Integración con ecosistema](#-integración-con-ecosistema-de-microservicios)
+
+### 🌍 **Localización y calidad**
+
+- [🗺️ Idiomas soportados](#️-idiomas-soportados)
+- [🚀 CI/CD y desarrollo](#-cicd-y-desarrollo)
+- [🔒 Consideraciones de seguridad](#-consideraciones-de-seguridad)
+
+### 📚 **Recursos**
+
+- [📖 Recursos adicionales](#-recursos-adicionales)
+- [🤝 Contribución y soporte](#-contribución-y-soporte)
 
 ---
 
@@ -348,7 +378,7 @@ services:
       MYSQL_USER: testuser
       MYSQL_PASSWORD: TestApp2025SecurePass
     ports:
-      - '3310:3306'
+      - "3310:3306"
     volumes:
       - ./init-test-databases.sql:/docker-entrypoint-initdb.d/init.sql
 ```
@@ -392,7 +422,7 @@ curl -X POST "https://api.accessibility.local/api/report" \
     "analysisId": 456,
     "format": "PDF",
     "filePath": "/reports/accessibility-report-456.pdf",
-    "generationDate": "2025-08-31T14:30:00Z",
+    "generationDate": "2025-09-13T14:30:00Z",
     "templateType": "comprehensive",
     "includeCharts": true,
     "includeRecommendations": true
@@ -410,13 +440,13 @@ curl -X POST "https://api.accessibility.local/api/report" \
     "analysisId": 456,
     "format": "PDF",
     "filePath": "/reports/accessibility-report-456.pdf",
-    "generationDate": "2025-08-31T14:30:00Z",
+    "generationDate": "2025-09-13T14:30:00Z",
     "status": "PENDING",
     "fileSize": null,
     "downloadUrl": null,
-    "expirationDate": "2025-09-30T14:30:00Z",
-    "createdAt": "2025-08-31T14:30:00Z",
-    "updatedAt": "2025-08-31T14:30:00Z"
+    "expirationDate": "2025-10-13T14:30:00Z",
+    "createdAt": "2025-09-13T14:30:00Z",
+    "updatedAt": "2025-09-13T14:30:00Z"
   }
 }
 ```
@@ -437,11 +467,11 @@ curl "https://api.accessibility.local/api/report/789" \
     "analysisId": 456,
     "format": "PDF",
     "filePath": "/reports/accessibility-report-456.pdf",
-    "generationDate": "2025-08-31T14:30:00Z",
+    "generationDate": "2025-09-13T14:30:00Z",
     "status": "COMPLETED",
     "fileSize": 2048576,
     "downloadUrl": "https://api.accessibility.local/api/report/789/download",
-    "expirationDate": "2025-09-30T14:30:00Z",
+    "expirationDate": "2025-10-13T14:30:00Z",
     "metadata": {
       "pages": 24,
       "violationsCount": 8,
@@ -449,8 +479,8 @@ curl "https://api.accessibility.local/api/report/789" \
       "templateVersion": "2.1",
       "generationTimeMs": 3420
     },
-    "createdAt": "2025-08-31T14:30:00Z",
-    "updatedAt": "2025-08-31T14:32:25Z"
+    "createdAt": "2025-09-13T14:30:00Z",
+    "updatedAt": "2025-09-13T14:32:25Z"
   }
 }
 ```
@@ -493,8 +523,8 @@ curl -X POST "https://api.accessibility.local/api/history" \
       "ipAddress": "192.168.1.100",
       "userAgent": "Mozilla/5.0..."
     },
-    "createdAt": "2025-08-31T14:32:30Z",
-    "updatedAt": "2025-08-31T14:32:30Z"
+    "createdAt": "2025-09-13T14:32:30Z",
+    "updatedAt": "2025-09-13T14:32:30Z"
   }
 }
 ```
@@ -543,7 +573,7 @@ curl "https://api.accessibility.local/api/history/by-user/42?page=1&pageSize=20"
     "value": "XLSX",
     "allowedValues": ["PDF", "HTML", "JSON"]
   },
-  "timestamp": "2025-08-31T14:30:00Z",
+  "timestamp": "2025-09-13T14:30:00Z",
   "path": "/api/report"
 }
 
@@ -551,7 +581,7 @@ curl "https://api.accessibility.local/api/history/by-user/42?page=1&pageSize=20"
 {
   "success": false,
   "error": "Reporte con ID 999 no encontrado",
-  "timestamp": "2025-08-31T14:30:00Z",
+  "timestamp": "2025-09-13T14:30:00Z",
   "path": "/api/report/999"
 }
 
@@ -564,7 +594,7 @@ curl "https://api.accessibility.local/api/history/by-user/42?page=1&pageSize=20"
     "analysisId": 456,
     "existingFormat": "PDF"
   },
-  "timestamp": "2025-08-31T14:30:00Z",
+  "timestamp": "2025-09-13T14:30:00Z",
   "path": "/api/report"
 }
 ```
@@ -595,8 +625,8 @@ services:
     image: magodeveloper/accessibility-ms-reports:dev
     container_name: accessibility-reports-dev
     ports:
-      - '5003:8083'
-      - '5103:8443' # HTTPS
+      - "5003:8083"
+      - "5103:8443" # HTTPS
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8083;https://+:8443
@@ -615,7 +645,7 @@ services:
     image: mysql:8.4
     container_name: accessibility-reports-db-dev
     ports:
-      - '3309:3306'
+      - "3309:3306"
     environment:
       MYSQL_ROOT_PASSWORD: cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiN
       MYSQL_DATABASE: reportsdb
@@ -689,6 +719,38 @@ USERS_SERVICE_TIMEOUT_MS=15000
 ENABLE_SERVICE_DISCOVERY=true
 ```
 
+### ⚡ Performance y benchmarks esperados
+
+**🚀 Métricas de generación de reportes:**
+
+| Formato  | Tamaño promedio | Tiempo generación | Límite concurrente | Memoria pico |
+| -------- | --------------- | ----------------- | ------------------ | ------------ |
+| **PDF**  | 2-5 MB          | 2-4 segundos      | 5 simultáneos      | 150-300 MB   |
+| **HTML** | 500 KB - 1 MB   | 1-2 segundos      | 10 simultáneos     | 80-150 MB    |
+| **JSON** | 100-500 KB      | 0.5-1 segundo     | 15 simultáneos     | 50-100 MB    |
+
+**📈 Configuraciones de rendimiento recomendadas:**
+
+```bash
+# Para entornos de alta demanda
+MAX_CONCURRENT_GENERATIONS=10
+REPORT_GENERATION_TIMEOUT_MS=120000
+CACHE_DURATION_MINUTES=60
+
+# Para entornos con recursos limitados
+MAX_CONCURRENT_GENERATIONS=3
+REPORT_GENERATION_TIMEOUT_MS=45000
+CACHE_DURATION_MINUTES=15
+```
+
+**🎯 Umbrales de monitoreo sugeridos:**
+
+- **Tiempo de respuesta**: < 5 segundos para PDF, < 3 segundos para HTML/JSON
+- **Memoria máxima**: < 500 MB por proceso de generación
+- **CPU utilizada**: < 80% durante picos de generación
+- **Tasa de éxito**: > 95% de reportes generados exitosamente
+- **Storage cleanup**: Reportes > 30 días eliminados automáticamente
+
 ### 📊 Monitoreo y métricas
 
 **🔍 Health checks implementados:**
@@ -752,7 +814,7 @@ POST http://accessibility-ms-users:5001/api/users/{userId}/activity
 {
   "activityType": "REPORT_GENERATED",
   "reportId": 789,
-  "timestamp": "2025-08-31T14:32:30Z"
+  "timestamp": "2025-09-13T14:32:30Z"
 }
 ```
 
@@ -874,6 +936,27 @@ dotnet test --filter Category=Performance --logger "console;verbosity=detailed"
 
 # Depuración con logs estructurados
 dotnet run --environment Development --verbosity diagnostic --property:EnableStructuredLogging=true
+
+# 🎯 Tests específicos del dominio de reportes
+dotnet test --filter "Category=ReportGeneration&Format=PDF" --logger trx --results-directory TestResults/Reports
+
+# Tests de integración con servicios externos
+dotnet test --filter "Category=Integration&Service=Analysis" --logger "console;verbosity=detailed"
+
+# Tests de validación de formatos
+dotnet test --filter "FullyQualifiedName~ReportFormatValidation" --logger json --results-directory TestResults/Validation
+
+# Tests de performance por formato específico
+dotnet test --filter "TestCategory=Performance&Format=HTML" --logger "trx;LogFileName=html-performance.trx"
+
+# Tests de almacenamiento y cleanup
+dotnet test --filter "TestCategory=Storage" --environment TEST_STORAGE_PATH=/tmp/test-reports
+
+# Tests de historial y auditoría
+dotnet test --filter "FullyQualifiedName~HistoryService" --collect:"Code Coverage" --settings coverage.runsettings
+
+# Tests end-to-end de flujo completo
+dotnet test --filter "Category=E2E" --logger "console;verbosity=normal" --results-directory TestResults/E2E
 ```
 
 ## 🔒 Consideraciones de seguridad
@@ -918,7 +1001,125 @@ dotnet run --environment Development --verbosity diagnostic --property:EnableStr
 6. **⏱️ Límites**: Timeouts apropiados y circuit breakers para evitar degradación
 7. **🗑️ Limpieza**: Políticas de retention automático para reportes y logs antiguos
 
-## 📚 Recursos adicionales
+## �️ Troubleshooting y resolución de problemas
+
+### 🚨 **Problemas comunes y soluciones**
+
+#### **❌ Error: "Report generation timeout"**
+
+```bash
+# Síntoma: Reportes PDF fallan con timeout
+Error: ReportGenerationException: Generation timeout after 60000ms
+
+# Solución 1: Aumentar timeout en configuración
+REPORT_GENERATION_TIMEOUT_MS=120000
+
+# Solución 2: Verificar memoria disponible
+docker stats accessibility-reports-api
+
+# Solución 3: Reducir concurrencia
+MAX_CONCURRENT_GENERATIONS=3
+```
+
+#### **🗄️ Error: "Database connection failed"**
+
+```bash
+# Síntoma: Cannot connect to MySQL
+SqlException: Unable to connect to any of the specified MySQL hosts
+
+# Solución 1: Verificar estado del contenedor de BD
+docker-compose ps reports-db
+
+# Solución 2: Verificar logs de MySQL
+docker-compose logs reports-db
+
+# Solución 3: Recrear base de datos
+docker-compose down -v
+docker-compose up -d reports-db
+```
+
+#### **🔒 Error: "Cross-microservice validation failed"**
+
+```bash
+# Síntoma: Analysis ID not found in external service
+ValidationException: Analysis 456 not found in accessibility-ms-analysis
+
+# Solución 1: Verificar conectividad entre servicios
+curl http://accessibility-ms-analysis:5002/health
+
+# Solución 2: Comprobar configuración de red Docker
+docker network ls
+docker network inspect accessibility-network
+
+# Solución 3: Verificar variables de entorno de servicios
+docker-compose config
+```
+
+#### **💾 Error: "Storage space exhausted"**
+
+```bash
+# Síntoma: Fallos en escritura de archivos de reporte
+IOException: No space left on device
+
+# Solución 1: Limpiar reportes antiguos manualmente
+find /app/reports -name "*.pdf" -mtime +30 -delete
+
+# Solución 2: Verificar y aumentar volumen Docker
+docker system df
+docker volume prune
+
+# Solución 3: Configurar limpieza automática
+REPORTS_CLEANUP_INTERVAL_HOURS=12
+REPORTS_MAX_AGE_DAYS=15
+```
+
+### 🔍 **Comandos de diagnóstico útiles**
+
+```bash
+# 📊 Estado general del sistema
+curl http://localhost:5003/health
+curl http://localhost:5003/health/ready
+curl http://localhost:5003/health/db
+
+# 📈 Métricas de performance
+curl http://localhost:5003/metrics
+
+# 🔍 Logs estructurados con filtro
+docker-compose logs reports-api | grep -i "error\|exception\|timeout"
+
+# 📋 Verificar configuración activa
+curl http://localhost:5003/api/config/active
+
+# 🗄️ Prueba de conexión a base de datos
+docker exec -it accessibility-reports-db-dev mysql -u reportsuser -p -e "SHOW TABLES;"
+
+# 🌐 Test de conectividad entre microservicios
+docker exec -it accessibility-reports-dev curl http://accessibility-ms-analysis:5002/health
+docker exec -it accessibility-reports-dev curl http://accessibility-ms-users:5001/health
+```
+
+### 📋 **Checklist de resolución rápida**
+
+✅ **Verificaciones básicas:**
+
+- [ ] Contenedores en ejecución: `docker-compose ps`
+- [ ] Logs sin errores críticos: `docker-compose logs --tail=50`
+- [ ] Health checks respondan: `curl localhost:5003/health`
+- [ ] Base de datos accesible: Conexión MySQL exitosa
+
+✅ **Verificaciones de red:**
+
+- [ ] Red Docker activa: `docker network inspect accessibility-network`
+- [ ] Puertos expuestos correctamente: `netstat -tlnp | grep 5003`
+- [ ] Servicios externos respondiendo: Health checks de otros microservicios
+
+✅ **Verificaciones de performance:**
+
+- [ ] Memoria suficiente: `docker stats` < 80% uso
+- [ ] Espacio en disco: `df -h` > 2GB disponible
+- [ ] CPU no saturada: Load average < número de cores
+
+## �📚 Recursos adicionales
 
 ### 🔗 Enlaces útiles
 
@@ -987,4 +1188,4 @@ dotnet run --environment Development --verbosity diagnostic --property:EnableStr
 
 > 💡 **¿Necesitas ayuda?** Consulta nuestra documentación técnica completa, revisa los issues existentes, o abre un nuevo issue con detalles específicos. El microservicio está diseñado para ser escalable y mantenible siguiendo arquitectura de microservicios empresarial.
 
-**🎯 Versión:** 1.0.0 | **📅 Última actualización:** Agosto 2025 | **⚡ Estado:** Producción listo
+**🎯 Versión:** 1.0.0 | **📅 Última actualización:** Septiembre 2025 | **⚡ Estado:** Producción listo

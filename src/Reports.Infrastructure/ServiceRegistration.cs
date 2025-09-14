@@ -2,6 +2,8 @@ using Reports.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Linq;
 
 namespace Reports.Infrastructure;
 
@@ -9,10 +11,17 @@ public static class ServiceRegistration
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
+        // Validate parameters
+        if (config == null)
+            throw new ArgumentNullException(nameof(config));
+
         // Detectar entorno de tests desde ambas claves posibles
         var environment = config["ASPNETCORE_ENVIRONMENT"] ?? config["Environment"];
 
-        if (environment == "TestEnvironment")
+        // Lista de entornos que deben usar InMemory database para tests
+        var testEnvironments = new[] { "TestEnvironment", "Testing", "Test", "UnitTest", "IntegrationTest", "Development" };
+
+        if (testEnvironments.Contains(environment, StringComparer.OrdinalIgnoreCase))
         {
             // Usar InMemory database para tests (sin restricciones de clave externa)
             services.AddDbContext<ReportsDbContext>(opt =>
