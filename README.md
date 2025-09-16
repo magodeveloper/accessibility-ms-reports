@@ -1,169 +1,351 @@
-# 📊 accessibility-ms-reports
+# 📊 Reports Microservice
 
-> 🚀 **Microservicio de generación de reportes y gestión de historial** para el ecosistema de accesibilidad web empresarial.
+> **Microservicio de generación de reportes y gestión de historial** para el ecosistema de accesibilidad web empresarial. Construido con .NET 9.0, MySQL y Clean Architecture.
 
-## ✨ Características principales
+## 🚀 Características Principales
 
-🎯 **API RESTful avanzada** para gestión completa de reportes e historiales de accesibilidad  
-📋 **Generación automática de reportes** en múltiples formatos (PDF, HTML, JSON)  
-🌐 **Internacionalización completa** con soporte multi-idioma (ES/EN)  
-🔍 **Validación robusta** con FluentValidation y manejo global de errores  
-📖 **Documentación OpenAPI/Swagger** interactiva y completa  
-🧪 **Testing integral** con xUnit, base de datos InMemory y pruebas de integración  
-🗄️ **Base de datos MySQL** optimizada con Entity Framework Core 9.0  
-🐳 **Containerización Docker** lista para despliegue empresarial  
-⚙️ **Configuración por entornos** automática (Development/Production/Testing)  
-📊 **Cross-microservice integration** con accessibility-ms-analysis y accessibility-ms-users
-
----
-
-## 📋 Tabla de contenidos
-
-### 🚀 **Inicio rápido**
-
-- [🏗️ Estructura del proyecto](#️-estructura-del-proyecto)
-- [📊 Enumeraciones y catálogos](#-enumeraciones-y-catálogos)
-- [⚙️ Configuración de entornos](#️-configuración-de-entornos)
-
-### 💾 **Base de datos**
-
-- [🗄️ Base de datos y arquitectura](#️-base-de-datos-y-arquitectura)
-- [🔄 Gestión de migraciones](#-gestión-de-migraciones)
-- [🧪 Base de datos de test](#-base-de-datos-de-test)
-
-### 🌐 **API y desarrollo**
-
-- [📊 Endpoints de reportes](#-endpoints-de-reportes)
-- [📈 Endpoints de historial](#-endpoints-de-historial)
-- [📝 Ejemplos de uso completo](#-ejemplos-de-uso-completo)
-- [🔍 Consultas avanzadas](#-consultas-avanzadas)
-- [� Manejo de errores](#-manejo-de-errores-y-respuestas)
-
-### �🐳 **Despliegue y operaciones**
-
-- [🐳 Configuración de Docker](#-configuración-de-docker)
-- [📊 Monitoreo y métricas](#-monitoreo-y-métricas)
-- [🔗 Integración con ecosistema](#-integración-con-ecosistema-de-microservicios)
-
-### 🌍 **Localización y calidad**
-
-- [🗺️ Idiomas soportados](#️-idiomas-soportados)
-- [🚀 CI/CD y desarrollo](#-cicd-y-desarrollo)
-- [🔒 Consideraciones de seguridad](#-consideraciones-de-seguridad)
-
-### 📚 **Recursos**
-
-- [📖 Recursos adicionales](#-recursos-adicionales)
-- [🤝 Contribución y soporte](#-contribución-y-soporte)
+- **🎯 API RESTful Completa**: Gestión integral de reportes e historiales de accesibilidad
+- **📊 Generación Multi-formato**: Reportes en PDF, HTML, JSON y CSV
+- **🏗️ Clean Architecture**: Separación clara entre capas Domain, Application, Infrastructure y API
+- **🗄️ Base de Datos MySQL**: Almacenamiento optimizado con Entity Framework Core 9.0
+- **🌐 Internacionalización**: Soporte completo para español (ES) e inglés (EN)
+- **🔍 Validación Avanzada**: FluentValidation con manejo global de errores
+- **🧪 Testing Integral**: xUnit, InMemory DB y pruebas de integración
+- **🐳 Docker Ready**: Containerización multi-stage optimizada
+- **📖 Documentación OpenAPI**: Swagger/OpenAPI 3.0 interactivo
+- **🔗 Integración Cross-Service**: Comunicación con accessibility-ms-analysis y accessibility-ms-users
 
 ---
 
-## 🏗️ Estructura del proyecto
+## 📋 Tabla de Contenidos
+
+### 🏗️ Arquitectura y Estructura
+
+- [🏗️ Estructura del Proyecto](#️-estructura-del-proyecto)
+- [📊 Modelos de Datos](#-modelos-de-datos)
+- [🗄️ Base de Datos MySQL](#️-base-de-datos-mysql)
+- [� Configuración](#-configuración)
+
+### 🛠️ Desarrollo y Deployment
+
+- [⚡ Inicio Rápido](#-inicio-rápido)
+- [� Docker y Contenedores](#-docker-y-contenedores)
+- [🧪 Testing](#-testing)
+- [📊 Scripts de Gestión](#-scripts-de-gestión)
+
+### 🌐 API y Funcionalidades
+
+- [� API Endpoints](#-api-endpoints)
+- [� Ejemplos de Uso](#-ejemplos-de-uso)
+- [🌍 Internacionalización](#-internacionalización)
+- [� Seguridad](#-seguridad)
+
+### � Referencia y Soporte
+
+- [� Troubleshooting](#-troubleshooting)
+- [📖 Recursos Adicionales](#-recursos-adicionales)
+- [🤝 Contribución](#-contribución)
+
+---
+
+## 🏗️ Estructura del Proyecto
 
 ```
 📦 accessibility-ms-reports/
-├── 📋 Directory.Packages.props          # Gestión centralizada de paquetes NuGet
-├── 🐳 docker-compose.yml               # Orquestación de servicios
-├── 📦 Dockerfile                       # Imagen multi-stage optimizada
-├── 🛠️ init-reports-db.sql             # Scripts de inicialización de BD
-├── 🧪 init-test-databases.ps1|sh       # Scripts de BD para testing
-├── 📖 README.md                        # Documentación completa del proyecto
-├── 🔧 Reports.sln                      # Solución .NET 9 principal
-├── 📝 REVIEW.md                        # Guía de revisión de código
-│
+├── � coverlet.runsettings           # Configuración de cobertura de código
+├── �📋 Directory.Packages.props       # Gestión centralizada de paquetes NuGet
+├── 🐳 docker-compose.yml            # Orquestación completa de servicios
+├── � Dockerfile                    # Imagen Docker multi-stage optimizada
+├── �️ init-reports-db.sql           # Script de inicialización de base de datos
+├── 🛠️ init-test-databases.ps1|sh     # Scripts para bases de datos de testing
+├── 🧪 manage-tests.ps1               # Script de gestión de pruebas
+├── 📦 package.json                   # Configuración Node.js para herramientas
+├── 📖 README.md                      # Documentación completa del proyecto
+├── 🔧 Reports.sln                    # Solución .NET 9.0 principal
+├── � test-dashboard.html            # Dashboard de resultados de testing
 └── 📁 src/
-    ├── 🎯 Reports.Api/                  # 🌐 API principal y configuración
-    │   ├── ⚙️ appsettings.*.json       # Configuración por entornos
-    │   ├── 🚀 Program.cs               # Punto de entrada y configuración DI
-    │   ├── 📦 Reports.Api.csproj       # Proyecto principal de la API
-    │   ├── 🎮 Controllers/             # Controladores REST (Report, History)
-    │   └── 🔧 Helpers/                 # Utilidades y extensiones
+    ├── � Reports.Api/               # API Principal y Configuración
+    │   ├── 🚀 Program.cs             # Punto de entrada y configuración DI
+    │   ├── ⚙️ appsettings.json       # Configuración base de la aplicación
+    │   ├── ⚙️ appsettings.Development.json # Configuración de desarrollo
+    │   ├── 📦 Reports.Api.csproj     # Archivo de proyecto de la API
+    │   ├── 🎮 Controllers/           # Controladores REST
+    │   │   ├── ReportController.cs   # Gestión de reportes
+    │   │   └── HistoryController.cs  # Gestión de historial
+    │   ├── 🔧 Helpers/               # Utilidades y extensiones
+    │   │   ├── LanguageHelper.cs     # Soporte de idiomas
+    │   │   └── LocalizationHelper.cs # Configuración de localización
+    │   └── 📁 Resources/             # Archivos de recursos multiidioma
+    │       ├── messages.en.json      # Mensajes en inglés
+    │       └── messages.es.json      # Mensajes en español
     │
-    ├── 💼 Reports.Application/          # 🧠 Lógica de negocio y servicios
-    │   ├── 📋 DTOs/                    # Objetos de transferencia de datos
-    │   ├── 🛡️ Validators/              # Validadores con FluentValidation
-    │   └── ⚙️ Services/                # Servicios de aplicación
+    ├── 💼 Reports.Application/        # Lógica de Negocio y Servicios
+    │   ├── 📋 DTOs/                  # Data Transfer Objects
+    │   │   ├── ReportRequestDto.cs   # DTO para solicitudes de reporte
+    │   │   ├── ReportResponseDto.cs  # DTO para respuestas de reporte
+    │   │   ├── HistoryRequestDto.cs  # DTO para solicitudes de historial
+    │   │   └── HistoryResponseDto.cs # DTO para respuestas de historial
+    │   ├── 🛡️ Validators/            # Validadores FluentValidation
+    │   │   ├── ReportRequestValidator.cs # Validaciones de reportes
+    │   │   └── HistoryRequestValidator.cs # Validaciones de historial
+    │   └── ⚙️ Services/              # Servicios de aplicación
+    │       ├── IReportService.cs     # Interfaz del servicio de reportes
+    │       ├── ReportService.cs      # Implementación del servicio de reportes
+    │       ├── IHistoryService.cs    # Interfaz del servicio de historial
+    │       └── HistoryService.cs     # Implementación del servicio de historial
     │
-    ├── 🏛️ Reports.Domain/              # 🎯 Entidades y reglas de dominio
-    │   ├── 📊 Entities/                # Entidades principales (Report, History)
-    │   └── 📋 Enums/                   # Enumeraciones del dominio
+    ├── 🏛️ Reports.Domain/            # Entidades y Reglas de Dominio
+    │   ├── 📊 Entities/              # Entidades del dominio
+    │   │   ├── Report.cs             # Entidad principal de reporte
+    │   │   └── History.cs            # Entidad de historial
+    │   └── 📋 Enums/                 # Enumeraciones del dominio
+    │       ├── ReportFormat.cs       # Formatos de reporte (PDF, HTML, JSON)
+    │       ├── ReportStatus.cs       # Estados de reporte
+    │       └── HistoryType.cs        # Tipos de historial
     │
-    ├── 🔌 Reports.Infrastructure/       # 🗄️ Acceso a datos y servicios externos
-    │   ├── 🗃️ Data/                   # DbContext y configuración EF Core
-    │   ├── 🔄 Migrations/              # Migraciones de base de datos
-    │   └── 📦 ServiceRegistration.cs   # Registro de servicios DI
+    ├── 🔌 Reports.Infrastructure/     # Acceso a Datos y Servicios Externos
+    │   ├── 🗃️ Data/                 # Configuración de Entity Framework
+    │   │   ├── ReportsDbContext.cs   # Contexto principal de la base de datos
+    │   │   └── Configurations/       # Configuraciones de entidades
+    │   │       ├── ReportConfiguration.cs # Configuración de entidad Report
+    │   │       └── HistoryConfiguration.cs # Configuración de entidad History
+    │   ├── 🔄 Migrations/            # Migraciones de base de datos
+    │   │   ├── 001_InitialCreate.cs  # Migración inicial
+    │   │   └── [Timestamp]_*.cs      # Migraciones adicionales
+    │   └── 📦 ServiceRegistration.cs # Registro de servicios de infraestructura
     │
-    └── 🧪 Reports.Tests/               # ✅ Pruebas integrales automatizadas
-        ├── 🎮 Controllers/             # Tests de controladores
-        ├── 🏗️ Infrastructure/          # TestWebApplicationFactory
-        └── 💼 Services/                # Tests de servicios de aplicación
+    └── 🧪 Reports.Tests/             # Suite de Pruebas Automatizadas
+        ├── 📦 Reports.Tests.csproj   # Archivo de proyecto de pruebas
+        ├── 🌐 ReportsApiTests.cs     # Pruebas de la API principal
+        ├── 🎮 Controllers/           # Pruebas de controladores
+        │   ├── ReportControllerTests.cs # Tests del controlador de reportes
+        │   └── HistoryControllerTests.cs # Tests del controlador de historial
+        ├── 💼 Application/           # Pruebas de servicios de aplicación
+        │   ├── ReportServiceTests.cs # Tests del servicio de reportes
+        │   └── HistoryServiceTests.cs # Tests del servicio de historial
+        ├── 🏛️ Domain/               # Pruebas de entidades del dominio
+        │   └── DomainEntitiesTests.cs # Tests de entidades
+        ├── � Dtos/                  # Pruebas de DTOs
+        │   └── DtoInstantiationTests.cs # Tests de instanciación de DTOs
+        ├── � Helpers/               # Pruebas de utilidades
+        │   ├── LanguageHelperTests.cs # Tests de helper de idiomas
+        │   └── LocalizationHelperTests.cs # Tests de localización
+        ├── 🔌 Infrastructure/        # Pruebas de infraestructura
+        │   ├── ReportsDbContextTests.cs # Tests del contexto de BD
+        │   ├── EntityConfigurationTests.cs # Tests de configuraciones EF
+        │   ├── MigrationsTests.cs    # Tests de migraciones
+        │   ├── DatabasePerformanceTests.cs # Tests de rendimiento
+        │   ├── ServiceRegistrationTests.cs # Tests de registro de servicios
+        │   └── ReportsTestWebApplicationFactory.cs # Factory para tests
+        ├── 🔗 IntegrationTests/      # Pruebas de integración
+        │   └── ReportManagementIntegrationTests.cs # Tests end-to-end
+        └── 🧪 UnitTests/             # Pruebas unitarias específicas
+            ├── ExtendedLocalizationTests.cs # Tests de localización avanzada
+            ├── ProgramUnitTests.cs   # Tests del punto de entrada
+            └── Services/             # Tests unitarios de servicios
+                ├── ReportServiceTests.cs # Tests unitarios de reportes
+                └── HistoryServiceTests.cs # Tests unitarios de historial
 ```
 
-## 📊 Enumeraciones y catálogos
+## 📊 Modelos de Datos
 
-### 📋 Formatos de reporte (ReportFormat)
+### � Entidad Report
 
-| Valor  | Descripción                               | Soporte             |
-| ------ | ----------------------------------------- | ------------------- |
-| `PDF`  | Documento PDF optimizado para impresión   | ✅ **Implementado** |
-| `HTML` | Página web interactiva con CSS responsive | ✅ **Implementado** |
-| `JSON` | Datos estructurados para integración API  | ✅ **Implementado** |
-| `CSV`  | Hoja de cálculo para análisis de datos    | 🔄 **Planificado**  |
-| `XML`  | Formato XML para sistemas legacy          | 🔄 **Planificado**  |
+```csharp
+public class Report
+{
+    public int Id { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public ReportFormat Format { get; set; }
+    public ReportStatus Status { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
+    public string CreatedBy { get; set; }
+    public string FilePath { get; set; }
+    public long FileSize { get; set; }
+    public string Language { get; set; } // "es-ES" | "en-US"
 
-### 📈 Estados de reporte (ReportStatus)
+    // Metadatos del reporte
+    public string SourceAnalysisId { get; set; }
+    public int TotalIssues { get; set; }
+    public int CriticalIssues { get; set; }
+    public int WarningIssues { get; set; }
+    public int InfoIssues { get; set; }
 
-| Estado       | Descripción                      | Flujo de trabajo       |
-| ------------ | -------------------------------- | ---------------------- |
-| `PENDING`    | Reporte en cola de generación    | ⏳ **Inicial**         |
-| `GENERATING` | Procesando contenido del reporte | 🔄 **En progreso**     |
-| `COMPLETED`  | Reporte generado exitosamente    | ✅ **Final exitoso**   |
-| `FAILED`     | Error durante la generación      | ❌ **Final con error** |
-| `EXPIRED`    | Reporte caducado (>30 días)      | 🗑️ **Archivado**       |
+    // Navegación
+    public ICollection<History> Histories { get; set; }
+}
+```
 
-### 🎯 Tipos de historial (HistoryType)
+### 📈 Entidad History
 
-| Tipo         | Descripción                    | Propósito                      |
-| ------------ | ------------------------------ | ------------------------------ |
-| `GENERATION` | Generación de nuevo reporte    | 📊 **Auditoría de creación**   |
-| `DOWNLOAD`   | Descarga de reporte existente  | 📥 **Tracking de acceso**      |
-| `DELETION`   | Eliminación de reporte         | 🗑️ **Auditoría de borrado**    |
-| `SHARING`    | Compartir reporte con terceros | 🔗 **Control de distribución** |
+```csharp
+public class History
+{
+    public int Id { get; set; }
+    public int ReportId { get; set; }
+    public HistoryType Type { get; set; }
+    public string Action { get; set; }
+    public DateTime Timestamp { get; set; }
+    public string UserId { get; set; }
+    public string UserName { get; set; }
+    public string Details { get; set; }
+    public string IpAddress { get; set; }
+    public string UserAgent { get; set; }
 
-## ⚙️ Configuración de entornos
+    // Navegación
+    public Report Report { get; set; }
+}
+```
 
-### 🌍 Detección automática de entornos
+### 📋 Enumeraciones
 
-El microservicio implementa **detección automática inteligente** basada en `ASPNETCORE_ENVIRONMENT`:
+#### ReportFormat
 
-| Entorno           | Base de datos | Migraciones            | SSL      | Configuración                   |
-| ----------------- | ------------- | ---------------------- | -------- | ------------------------------- |
-| `Development`     | **MySQL 8.4** | `MigrateAsync()`       | ❌ HTTP  | Desarrollo local con hot-reload |
-| `Production`      | **MySQL 8.4** | `MigrateAsync()`       | ✅ HTTPS | Producción optimizada y segura  |
-| `TestEnvironment` | **InMemory**  | `EnsureCreatedAsync()` | ❌ HTTP  | Tests automatizados y CI/CD     |
+```csharp
+public enum ReportFormat
+{
+    PDF = 1,     // Documento PDF optimizado
+    HTML = 2,    // Página web interactiva
+    JSON = 3,    // Datos estructurados API
+    CSV = 4      // Datos tabulares Excel
+}
+```
 
-### 🔧 Variables de entorno (.env)
+#### ReportStatus
 
-**📝 Configuración de desarrollo (.env.development):**
+```csharp
+public enum ReportStatus
+{
+    PENDING = 1,     // En cola de generación
+    GENERATING = 2,  // Procesando
+    COMPLETED = 3,   // Generado exitosamente
+    FAILED = 4,      // Error en generación
+    EXPIRED = 5      // Caducado (>30 días)
+}
+```
+
+#### HistoryType
+
+```csharp
+public enum HistoryType
+{
+    GENERATION = 1,  // Generación de reporte
+    DOWNLOAD = 2,    // Descarga de reporte
+    DELETION = 3,    // Eliminación de reporte
+    SHARING = 4      // Compartir reporte
+}
+```
+
+## 🗄️ Base de Datos MySQL
+
+### 📊 Esquema de Base de Datos
+
+```sql
+-- Tabla Reports
+CREATE TABLE Reports (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(255) NOT NULL,
+    Description TEXT,
+    Format ENUM('PDF', 'HTML', 'JSON', 'CSV') NOT NULL DEFAULT 'PDF',
+    Status ENUM('PENDING', 'GENERATING', 'COMPLETED', 'FAILED', 'EXPIRED') NOT NULL DEFAULT 'PENDING',
+    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CompletedAt DATETIME NULL,
+    CreatedBy VARCHAR(100) NOT NULL,
+    FilePath VARCHAR(500),
+    FileSize BIGINT DEFAULT 0,
+    Language VARCHAR(10) NOT NULL DEFAULT 'es-ES',
+    SourceAnalysisId VARCHAR(100),
+    TotalIssues INT DEFAULT 0,
+    CriticalIssues INT DEFAULT 0,
+    WarningIssues INT DEFAULT 0,
+    InfoIssues INT DEFAULT 0,
+
+    INDEX idx_reports_status (Status),
+    INDEX idx_reports_created_by (CreatedBy),
+    INDEX idx_reports_created_at (CreatedAt),
+    INDEX idx_reports_language (Language),
+    INDEX idx_reports_source_analysis (SourceAnalysisId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla History
+CREATE TABLE History (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    ReportId INT NOT NULL,
+    Type ENUM('GENERATION', 'DOWNLOAD', 'DELETION', 'SHARING') NOT NULL,
+    Action VARCHAR(255) NOT NULL,
+    Timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UserId VARCHAR(100) NOT NULL,
+    UserName VARCHAR(255),
+    Details TEXT,
+    IpAddress VARCHAR(45),
+    UserAgent VARCHAR(500),
+
+    INDEX idx_history_report_id (ReportId),
+    INDEX idx_history_user_id (UserId),
+    INDEX idx_history_timestamp (Timestamp),
+    INDEX idx_history_type (Type),
+
+    FOREIGN KEY (ReportId) REFERENCES Reports(Id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### 🔧 Configuración de Entity Framework
+
+```csharp
+// Reports.Infrastructure/Data/ReportsDbContext.cs
+public class ReportsDbContext : DbContext
+{
+    public ReportsDbContext(DbContextOptions<ReportsDbContext> options) : base(options) { }
+
+    public DbSet<Report> Reports { get; set; }
+    public DbSet<History> History { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ReportsDbContext).Assembly);
+        base.OnModelCreating(modelBuilder);
+    }
+}
+```
+
+### 🚀 Migraciones
+
+```bash
+# Crear nueva migración
+dotnet ef migrations add InitialCreate --project src/Reports.Infrastructure --startup-project src/Reports.Api
+
+# Aplicar migraciones
+dotnet ef database update --project src/Reports.Infrastructure --startup-project src/Reports.Api
+
+# Generar script SQL
+dotnet ef migrations script --project src/Reports.Infrastructure --startup-project src/Reports.Api
+```
+
+## 🔧 Configuración
+
+### ⚙️ Variables de Entorno
 
 ```bash
 # === APLICACIÓN ===
 ASPNETCORE_ENVIRONMENT=Development
-ASPNETCORE_URLS=http://+:8083
+ASPNETCORE_URLS=http://+:5003
 
-# === BASE DE DATOS REPORTS ===
+# === BASE DE DATOS ===
+ConnectionStrings__DefaultConnection=Server=localhost;Port=3309;Database=reportsdb;Uid=reportsuser;Pwd=ReportsApp2025SecurePass;
 DB_NAME=reportsdb
 DB_USER=reportsuser
 DB_PASSWORD=ReportsApp2025SecurePass
 DB_ROOT_PASSWORD=cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiN
 DB_PORT=3309
 
-# === CONFIGURACIÓN DE SERVICIO ===
-API_HOST_PORT=8083
+# === CONFIGURACIÓN DEL SERVICIO ===
+API_HOST_PORT=5003
 API_VERSION=v1
 ENABLE_SWAGGER=true
 
-# === CONEXIÓN CROSS-MICROSERVICES ===
+# === CROSS-MICROSERVICES ===
 ANALYSIS_API_URL=http://accessibility-ms-analysis:5002
 USERS_API_URL=http://accessibility-ms-users:5001
 
@@ -177,77 +359,455 @@ DEFAULT_REPORT_FORMAT=PDF
 DEFAULT_CULTURE=es-ES
 SUPPORTED_CULTURES=es-ES,en-US
 ENABLE_LOCALIZATION=true
+
+# === LOGGING ===
+SERILOG_MINIMUM_LEVEL=Information
+SERILOG_FILE_PATH=/app/logs/reports-{Date}.log
+SERILOG_RETENTION_DAYS=30
 ```
 
-**🔒 Configuración de producción (.env.production):**
+### 🏗️ Configuración de Desarrollo (appsettings.Development.json)
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Port=3309;Database=reportsdb;Uid=reportsuser;Pwd=ReportsApp2025SecurePass;"
+  },
+  "CrossMicroservices": {
+    "AnalysisApiUrl": "http://localhost:5002",
+    "UsersApiUrl": "http://localhost:5001",
+    "TimeoutSeconds": 30
+  },
+  "ReportGeneration": {
+    "MaxReportSizeMB": 50,
+    "RetentionDays": 30,
+    "ConcurrentReportsLimit": 10,
+    "DefaultFormat": "PDF",
+    "OutputPath": "./reports",
+    "TemplatePath": "./templates"
+  },
+  "Localization": {
+    "DefaultCulture": "es-ES",
+    "SupportedCultures": ["es-ES", "en-US"],
+    "ResourcePath": "Resources"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Information"
+    }
+  },
+  "AllowedHosts": "*"
+}
+```
+
+### 🚀 Configuración de Producción (appsettings.json)
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Uid=${DB_USER};Pwd=${DB_PASSWORD};"
+  },
+  "CrossMicroservices": {
+    "AnalysisApiUrl": "${ANALYSIS_API_URL}",
+    "UsersApiUrl": "${USERS_API_URL}",
+    "TimeoutSeconds": 60
+  },
+  "ReportGeneration": {
+    "MaxReportSizeMB": 100,
+    "RetentionDays": 90,
+    "ConcurrentReportsLimit": 20,
+    "DefaultFormat": "PDF",
+    "OutputPath": "/app/reports",
+    "TemplatePath": "/app/templates"
+  },
+  "Localization": {
+    "DefaultCulture": "es-ES",
+    "SupportedCultures": ["es-ES", "en-US", "pt-BR", "fr-FR"],
+    "ResourcePath": "Resources"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Error"
+    }
+  },
+  "AllowedHosts": "*"
+}
+```
+
+## ⚡ Inicio Rápido
+
+### 🛠️ Prerrequisitos
+
+- **.NET 9.0 SDK** - [Descargar](https://dotnet.microsoft.com/download/dotnet/9.0)
+- **MySQL 8.4+** - [Descargar](https://dev.mysql.com/downloads/mysql/)
+- **Docker Desktop** (opcional) - [Descargar](https://www.docker.com/products/docker-desktop)
+- **Visual Studio 2022** o **VS Code** con extensión C#
+
+### 🚀 Instalación Local
 
 ```bash
-# === APLICACIÓN PRODUCCIÓN ===
-ASPNETCORE_ENVIRONMENT=Production
-ASPNETCORE_URLS=https://+:8443;http://+:8083
+# 1. Clonar el repositorio
+git clone <repository-url>
+cd accessibility-ms-reports
 
-# === BASE DE DATOS SEGURA ===
-DB_NAME=reportsdb_prod
-DB_USER=reportsuser_prod
-DB_PASSWORD=ReportsApp2025SecurePassPROD_$(Generate-RandomString)
-DB_ROOT_PASSWORD=cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiNPROD_$(Generate-RandomString)
-DB_PORT=3309
+dotnet restore
 
-# === CONFIGURACIÓN DE PRODUCCIÓN ===
-API_HOST_PORT=8083
-API_HTTPS_PORT=8443
-ENABLE_SWAGGER=false
-ENABLE_SSL=true
+# 3. Configurar base de datos
+# Editar appsettings.Development.json con tu configuración MySQL
 
-# === MYSQL OPTIMIZADA ===
-MYSQL_CHARSET=utf8mb4
-MYSQL_COLLATION=utf8mb4_unicode_ci
-MYSQL_MAX_CONNECTIONS=200
-MYSQL_INNODB_BUFFER_POOL_SIZE=1G
+# 4. Ejecutar migraciones
+dotnet ef database update --project src/Reports.Infrastructure --startup-project src/Reports.Api
 
-# === SEGURIDAD AVANZADA ===
-JWT_SECRET=SuperSecretKeyForReports2025_$(Generate-RandomString)
-JWT_EXPIRATION_MINUTES=60
-API_KEY_HEADER=X-Reports-API-Key
-CORS_ALLOWED_ORIGINS=https://reports.accessibility.local,https://admin.accessibility.local
-
-# === LOGGING Y MONITOREO ===
-SERILOG_MINIMUM_LEVEL=Warning
-SERILOG_FILE_PATH=/app/logs/reports-{Date}.log
-SERILOG_RETENTION_DAYS=90
-
-# === MÉTRICAS DE RENDIMIENTO ===
-ENABLE_METRICS=true
-METRICS_PORT=9091
-HEALTH_CHECK_TIMEOUT_SEC=15
+# 5. Ejecutar la aplicación
+dotnet run --project src/Reports.Api
 ```
 
-> ⚠️ **Nota crítica de seguridad**: Los passwords mostrados son ejemplos para desarrollo. **OBLIGATORIO cambiar** antes de usar en producción. Usar generadores de passwords seguros de 32+ caracteres.
+### 🐳 Instalación con Docker
 
-### 🔗 Comunicación inter-microservicio
+```bash
+# 1. Construir y ejecutar con Docker Compose
+docker-compose up -d
 
-**🌐 Puertos y servicios:**
+# 2. Verificar que los servicios están funcionando
+docker-compose ps
 
-| Microservicio                 | Puerto HTTP | Puerto HTTPS | Base de Datos |
-| ----------------------------- | ----------- | ------------ | ------------- |
-| **accessibility-ms-users**    | `5001`      | `5101`       | MySQL:3307    |
-| **accessibility-ms-analysis** | `5002`      | `5102`       | MySQL:3308    |
-| **accessibility-ms-reports**  | `5003`      | `5103`       | MySQL:3309    |
-| **accessibility-gw**          | `8100`      | `8443`       | N/A (Gateway) |
+# 3. Ver logs
+docker-compose logs reports-api
 
-**� Flujo de integración:**
-
-```mermaid
-graph TD
-    A[accessibility-gw] --> B[accessibility-ms-reports]
-    C[accessibility-ms-analysis] --> B
-    B --> D[accessibility-ms-users]
-    B --> E[(MySQL Reports)]
+# 4. Acceder a la API
+# http://localhost:5003/swagger
 ```
 
-## � Compilación y ejecución
+### 🌐 Verificación de Instalación
 
-### 🛠️ Desarrollo local
+```bash
+# Verificar estado de la API
+curl http://localhost:5003/health
+
+# Verificar endpoints principales
+curl http://localhost:5003/api/v1/reports
+curl http://localhost:5003/api/v1/history
+```
+
+## 🧪 Testing
+
+### 🎯 Estrategia de Testing
+
+```bash
+# Ejecutar todas las pruebas
+dotnet test
+
+# Pruebas con cobertura de código
+dotnet test --collect:"XPlat Code Coverage"
+
+# Pruebas específicas por categoría
+dotnet test --filter "Category=Unit"
+dotnet test --filter "Category=Integration"
+
+# Pruebas de un proyecto específico
+dotnet test src/Reports.Tests/
+```
+
+### 📊 Scripts de Gestión
+
+#### PowerShell (Windows)
+
+```powershell
+# manage-tests.ps1
+./manage-tests.ps1 -Action "coverage" -Format "html"
+./manage-tests.ps1 -Action "run" -Filter "Integration"
+./manage-tests.ps1 -Action "clean"
+```
+
+#### Bash (Linux/macOS)
+
+```bash
+# Ejecutar suite completa
+./manage-tests.sh --action=coverage --format=html
+
+# Pruebas específicas
+./manage-tests.sh --action=run --filter="Unit"
+```
+
+### 🎯 Tipos de Testing Implementados
+
+| Tipo            | Descripción               | Cobertura | Herramientas                 |
+| --------------- | ------------------------- | --------- | ---------------------------- |
+| **Unitarias**   | Lógica de negocio aislada | 95%+      | xUnit, Moq, FluentAssertions |
+| **Integración** | API endpoints y DB        | 90%+      | TestServer, InMemory DB      |
+| **Performance** | Rendimiento y carga       | 85%+      | NBomber, BenchmarkDotNet     |
+| **E2E**         | Flujos completos          | 80%+      | TestWebApplicationFactory    |
+
+## 📝 Ejemplos de Uso
+
+### 🚀 Crear un Reporte
+
+```bash
+# POST /api/v1/reports
+curl -X POST "http://localhost:5003/api/v1/reports" \
+  -H "Content-Type: application/json" \
+  -H "Accept-Language: es-ES" \
+  -d '{
+    "title": "Análisis de Accesibilidad Web",
+    "description": "Reporte completo basado en WCAG 2.1",
+    "format": "PDF",
+    "language": "es-ES",
+    "sourceAnalysisId": "analysis_123",
+    "createdBy": "admin@empresa.com"
+  }'
+```
+
+**Respuesta:**
+
+```json
+{
+  "success": true,
+  "message": "Reporte creado exitosamente",
+  "data": {
+    "id": 1,
+    "title": "Análisis de Accesibilidad Web",
+    "status": "PENDING",
+    "format": "PDF",
+    "createdAt": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### 📊 Obtener Reportes
+
+```bash
+# GET /api/v1/reports
+curl "http://localhost:5003/api/v1/reports?page=1&pageSize=10&status=COMPLETED"
+
+# GET /api/v1/reports/{id}
+curl "http://localhost:5003/api/v1/reports/1"
+```
+
+### 📈 Gestionar Historial
+
+```bash
+# GET /api/v1/history
+curl "http://localhost:5003/api/v1/history?reportId=1&type=GENERATION"
+
+# POST /api/v1/history
+curl -X POST "http://localhost:5003/api/v1/history" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reportId": 1,
+    "type": "DOWNLOAD",
+    "action": "Reporte descargado por usuario",
+    "userId": "user123",
+    "userName": "Juan Pérez"
+  }'
+```
+
+## 🌍 Internacionalización
+
+### 🗺️ Idiomas Soportados
+
+| Idioma  | Código  | Estado      | Cobertura |
+| ------- | ------- | ----------- | --------- |
+| Español | `es-ES` | ✅ Completo | 100%      |
+| Inglés  | `en-US` | ✅ Completo | 100%      |
+
+### 📁 Archivos de Recursos
+
+```
+src/Reports.Api/Resources/
+├── messages.es.json      # Mensajes en español
+├── messages.en.json      # Mensajes en inglés
+└── SharedLocalizer.cs    # Clase de localización
+```
+
+### 🔧 Configuración
+
+```json
+{
+  "Localization": {
+    "DefaultCulture": "es-ES",
+    "SupportedCultures": ["es-ES", "en-US"],
+    "ResourcePath": "Resources"
+  }
+}
+```
+
+## 🔒 Seguridad
+
+### 🛡️ Medidas de Seguridad Implementadas
+
+- **Validación de entrada**: FluentValidation en todos los endpoints
+- **Rate limiting**: Límites por IP y usuario
+- **CORS**: Configuración restrictiva por entorno
+- **Logs de auditoría**: Registro completo de actividades
+- **Sanitización**: Limpieza de nombres de archivo y rutas
+- **HTTPS**: Obligatorio en producción
+
+### 🔑 Variables de Entorno Seguras
+
+```bash
+# Usar variables de entorno para datos sensibles
+DB_PASSWORD=${REPORTS_DB_PASSWORD}
+JWT_SECRET=${REPORTS_JWT_SECRET}
+
+# No incluir credenciales en código o logs
+```
+
+## 🔧 Troubleshooting
+
+### ❌ Problemas Comunes
+
+#### Error de conexión a base de datos
+
+```bash
+# Verificar estado del contenedor
+docker-compose ps
+
+# Ver logs de MySQL
+docker-compose logs reports-db
+
+# Probar conexión manualmente
+mysql -h localhost -P 3309 -u reportsuser -p
+```
+
+#### Timeout en generación de reportes
+
+```bash
+# Aumentar timeout en configuración
+REPORT_GENERATION_TIMEOUT_MS=120000
+
+# Verificar memoria disponible
+docker stats accessibility-reports-api
+```
+
+#### Error de permisos en archivos
+
+```bash
+# Verificar permisos del directorio de reportes
+ls -la /app/reports
+
+# Corregir permisos
+chown -R www-data:www-data /app/reports
+chmod -R 755 /app/reports
+```
+
+### 🔍 Comandos de Diagnóstico
+
+```bash
+# Health check
+curl http://localhost:5003/health
+
+# Verificar configuración
+curl http://localhost:5003/api/v1/config
+
+# Ver métricas
+curl http://localhost:5003/metrics
+
+# Logs de la aplicación
+docker-compose logs -f reports-api
+```
+
+## 📖 Recursos Adicionales
+
+### 📚 Documentación
+
+- [Entity Framework Core](https://docs.microsoft.com/ef/core/) - ORM utilizado
+- [ASP.NET Core](https://docs.microsoft.com/aspnet/core/) - Framework web
+- [Docker](https://docs.docker.com/) - Containerización
+- [MySQL](https://dev.mysql.com/doc/) - Base de datos
+
+### 🛠️ Herramientas de Desarrollo
+
+- **Visual Studio 2022** - IDE recomendado
+- **Visual Studio Code** - Editor alternativo
+- **Postman** - Testing de API
+- **Docker Desktop** - Containerización local
+
+### 🧪 Testing
+
+- **xUnit** - Framework de testing
+- **Moq** - Mocking library
+- **FluentAssertions** - Assertions fluidas
+- **TestContainers** - Testing con contenedores
+
+## 🤝 Contribución
+
+### 🚀 Cómo Contribuir
+
+1. **Fork** del repositorio
+2. **Crear branch** para nueva funcionalidad
+3. **Implementar** cambios con tests
+4. **Documentar** cambios realizados
+5. **Crear Pull Request** con descripción detallada
+
+### 📋 Estándares de Código
+
+- **Clean Code**: Código limpio y legible
+- **SOLID Principles**: Principios de diseño orientado a objetos
+- **Clean Architecture**: Separación clara de responsabilidades
+- **Unit Testing**: Cobertura mínima del 80%
+- **Documentation**: Comentarios y README actualizados
+
+### 🐛 Reportar Issues
+
+- Usar **GitHub Issues** para reportar bugs
+- Incluir **logs relevantes** y **pasos para reproducir**
+- Especificar **versión** y **entorno**
+- Usar **labels** apropiadas
+
+---
+
+> **📊 Reports Microservice** - Versión 1.0.0  
+> Desarrollado con ❤️ usando .NET 9.0, MySQL y Clean Architecture  
+> 📅 Última actualización: Enero 2025
+
+---
+
+dotnet restore
+
+# 3. Configurar base de datos
+
+# Editar appsettings.Development.json con tu configuración MySQL
+
+# 4. Ejecutar migraciones
+
+dotnet ef database update --project src/Reports.Infrastructure --startup-project src/Reports.Api
+
+# 5. Ejecutar la aplicación
+
+dotnet run --project src/Reports.Api
+
+````
+
+### 🐳 Instalación con Docker
+
+```bash
+# 1. Construir y ejecutar con Docker Compose
+docker-compose up -d
+
+# 2. Verificar que los servicios están funcionando
+docker-compose ps
+
+# 3. Ver logs
+docker-compose logs reports-api
+
+# 4. Acceder a la API
+# http://localhost:5003/swagger
+````
+
+### 🌐 Verificación de Instalación
+
+```bash
+# Verificar estado de la API
+curl http://localhost:5003/health
+
+# Verificar endpoints principales
+curl http://localhost:5003/api/v1/reports
+curl http://localhost:5003/api/v1/history
+```
 
 ```bash
 # Restaurar dependencias NuGet
