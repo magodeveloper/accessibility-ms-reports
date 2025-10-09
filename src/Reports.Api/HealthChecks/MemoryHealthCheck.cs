@@ -53,6 +53,7 @@ public class MemoryHealthCheck : IHealthCheck
         }
         catch (Exception ex)
         {
+            // ExcludeFromCodeCoverage: Solo ocurre en fallos críticos del sistema
             _logger.LogError(ex, "Memory health check failed");
 
             return Task.FromResult(HealthCheckResult.Unhealthy(

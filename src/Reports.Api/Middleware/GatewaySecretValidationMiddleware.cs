@@ -21,6 +21,7 @@ public class GatewaySecretValidationMiddleware
         _logger = logger;
         _expectedSecret = configuration["Gateway:Secret"] ?? configuration["GATEWAY_SECRET"];
 
+        // El warning es normal en entornos de test - no es un problema
         if (string.IsNullOrEmpty(_expectedSecret))
         {
             _logger.LogWarning("Gateway:Secret not configured. Gateway secret validation will be disabled.");

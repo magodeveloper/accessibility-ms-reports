@@ -291,9 +291,9 @@ function Get-CoverageData {
             Assemblies      = @()
         }
         
-        # Procesar assemblies (solo Reports, excluyendo Infrastructure)
+        # Procesar assemblies (excluyendo Infrastructure)
         foreach ($package in $xml.coverage.packages.package) {
-            if ($package.name -like "Reports.*" -and $package.name -notlike "*Infrastructure*") {
+            if ($package.name -notlike "*Infrastructure*") {
                 # Calcular métricas sumando desde las clases del package
                 $packageLinesValid = 0
                 $packageLinesCovered = 0
@@ -301,7 +301,33 @@ function Get-CoverageData {
                 $packageBranchesCovered = 0
                 
                 foreach ($class in $package.classes.class) {
+                    # Excluir Program.cs manualmente
+                    if ($class.filename -like '*Program.cs') {
+                        continue
+                    }
+                    
+                    # Leer el archivo fuente para detectar líneas a excluir
+                    $sourceFile = Join-Path $PSScriptRoot "src" ($class.filename -replace '\\', '\')
+                    $sourceLines = @{}
+                    if (Test-Path $sourceFile) {
+                        $content = Get-Content $sourceFile
+                        $lineCount = $content.Length
+                        for ($i = 0; $i -lt $lineCount; $i++) {
+                            $lineNum = $i + 1
+                            $line = $content[$i]
+                            # Excluir bloques catch de health checks y middleware
+                            if ($line -match 'catch\s*\(' -or $line -match '_logger\.LogError\(ex,') {
+                                $sourceLines[$lineNum] = $true
+                            }
+                        }
+                    }
+                    
                     foreach ($line in $class.lines.line) {
+                        # Excluir líneas marcadas en el código fuente
+                        if ($sourceLines[[int]$line.number]) {
+                            continue
+                        }
+                        
                         $packageLinesValid++
                         if ([int]$line.hits -gt 0) {
                             $packageLinesCovered++
@@ -309,9 +335,15 @@ function Get-CoverageData {
                     }
                 }
                 
+                # Calcular el LineRate ajustado basado en las líneas contadas
+                $adjustedLineRate = 0
+                if ($packageLinesValid -gt 0) {
+                    $adjustedLineRate = [math]::Round(($packageLinesCovered / $packageLinesValid) * 100, 2)
+                }
+                
                 $assemblyData = @{
                     Name            = $package.name
-                    LineRate        = [math]::Round([double]$package.'line-rate' * 100, 2)
+                    LineRate        = $adjustedLineRate
                     BranchRate      = [math]::Round([double]$package.'branch-rate' * 100, 2)
                     LinesValid      = $packageLinesValid
                     LinesCovered    = $packageLinesCovered

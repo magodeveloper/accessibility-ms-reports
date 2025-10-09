@@ -38,14 +38,16 @@ public class ReportsDbContextConsolidatedTests : IDisposable
     public void ReportsDbContext_ShouldHaveReportsDbSet()
     {
         // Assert
-        _context.Reports.Should().NotBeNull();
+        _context.Should().NotBeNull();
+        _context!.Reports.Should().NotBeNull();
     }
 
     [Fact]
     public void ReportsDbContext_ShouldHaveHistoryDbSet()
     {
         // Assert
-        _context.History.Should().NotBeNull();
+        _context.Should().NotBeNull();
+        _context!.History.Should().NotBeNull();
     }
 
     #endregion
@@ -93,7 +95,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
         // Assert
         primaryKey.Should().NotBeNull();
         primaryKey!.Properties.Should().HaveCount(1);
-        primaryKey.Properties.First().Name.Should().Be("Id");
+        primaryKey.Properties[0].Name.Should().Be("Id");
     }
 
     [Fact]
@@ -109,7 +111,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
         // Assert
         primaryKey.Should().NotBeNull();
         primaryKey!.Properties.Should().HaveCount(1);
-        primaryKey.Properties.First().Name.Should().Be("Id");
+        primaryKey.Properties[0].Name.Should().Be("Id");
     }
 
     [Fact]
@@ -224,7 +226,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
         };
 
         // Act
-        _context.Reports.Add(report);
+        _context!.Reports.Add(report);
         _context.SaveChanges();
 
         // Assert
@@ -248,7 +250,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
         };
 
         // Act
-        _context.History.Add(historyEntry);
+        _context!.History.Add(historyEntry);
         _context.SaveChanges();
 
         // Assert
@@ -277,7 +279,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
         }
 
         // Act
-        _context.Reports.AddRange(reports);
+        _context!.Reports.AddRange(reports);
         _context.SaveChanges();
 
         // Assert
@@ -295,7 +297,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
             new() { AnalysisId = 3, Format = ReportFormat.Json, FilePath = "test3.json", GenerationDate = DateTime.UtcNow.AddDays(-1), CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
         };
 
-        _context.Reports.AddRange(reports);
+        _context!.Reports.AddRange(reports);
         _context.SaveChanges();
 
         // Act
@@ -336,7 +338,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
         };
 
         // Act
-        _context.Reports.Add(report);
+        _context!.Reports.Add(report);
         _context.History.Add(historyEntry);
         _context.SaveChanges();
 
@@ -368,7 +370,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
         };
 
         // Act & Assert
-        _context.Reports.Add(report);
+        _context!.Reports.Add(report);
         var action = () => _context.SaveChanges();
 
         // Note: InMemory provider is more lenient than real database
@@ -437,7 +439,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
             });
         }
 
-        _context.Reports.AddRange(reports);
+        _context!.Reports.AddRange(reports);
         _context.SaveChanges();
 
         // Act
@@ -470,5 +472,4 @@ public class ReportsDbContextConsolidatedTests : IDisposable
             _disposed = true;
         }
     }
-}   }
 }

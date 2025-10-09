@@ -19,28 +19,11 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
         _factory = factory;
     }
 
-    /// <summary>
-    /// Helper method para crear un cliente HTTP con headers de usuario autenticado (simulando Gateway)
-    /// </summary>
-    private HttpClient CreateAuthenticatedClient(int userId = 1, string email = "test@test.com", string role = "user", string userName = "Test User")
-    {
-        var client = _factory.CreateClient();
-
-        // Agregar headers X-User-* que el Gateway propaga después de validar JWT
-        client.DefaultRequestHeaders.Add("X-User-Id", userId.ToString());
-        client.DefaultRequestHeaders.Add("X-User-Email", email);
-        client.DefaultRequestHeaders.Add("X-User-Role", role);
-        client.DefaultRequestHeaders.Add("X-User-Name", userName);
-
-        return client;
-    }
-
-
     [Fact]
     public async Task ReportCRUD_ShouldWorkCompletely()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
         var reportDto = new ReportDto
         {
             AnalysisId = 100,
@@ -88,7 +71,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task HistoryCRUD_ShouldWorkCompletely()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
         var historyDto = new HistoryDto
         {
             UserId = 1,  // Must match authenticated user's ID
@@ -130,7 +113,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task GetNonExistentReport_ShouldReturn404()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
 
         // Act
         var response = await client.GetAsync("/api/report/by-analysis/999999");
@@ -143,7 +126,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task GetNonExistentHistory_ShouldReturn404()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
 
         // Act - Try to access by-user with authenticated user's ID (1) but no data exists
         var response = await client.GetAsync("/api/history/by-user/1");
@@ -156,7 +139,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task CreateMultipleReports_ShouldWorkCorrectly()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
         _factory.ResetDatabase();
 
         var reports = new[]
@@ -186,7 +169,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task CreateMultipleHistory_ShouldWorkCorrectly()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
         _factory.ResetDatabase();
 
         var histories = new[]
@@ -220,7 +203,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task CreateReportWithDifferentFormats_ShouldWork(ReportFormat format)
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
         var reportDto = new ReportDto
         {
             AnalysisId = 100,
@@ -240,7 +223,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task DeleteAllReports_WhenEmpty_ShouldReturn404()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
         _factory.ResetDatabase();
 
         // Act
@@ -254,7 +237,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task DeleteAllHistory_WhenEmpty_ShouldReturn404()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
         _factory.ResetDatabase();
 
         // Act
@@ -268,7 +251,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task GetReportsByFormat_ShouldFilterCorrectly()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
         _factory.ResetDatabase();
 
         var reports = new[]
@@ -295,7 +278,7 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     public async Task GetHistoryByAnalysisId_ShouldFilterCorrectly()
     {
         // Arrange
-        var client = CreateAuthenticatedClient();
+        var client = _factory.CreateAuthenticatedClient();
         _factory.ResetDatabase();
 
         var analysisId = 100;

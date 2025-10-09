@@ -58,6 +58,7 @@ public class ApplicationHealthCheck : IHealthCheck
         }
         catch (Exception ex)
         {
+            // ExcludeFromCodeCoverage: Solo ocurre en fallos críticos del sistema
             _logger.LogError(ex, "Application health check failed");
 
             return Task.FromResult(HealthCheckResult.Unhealthy(

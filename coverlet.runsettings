@@ -18,6 +18,9 @@
           </ExcludeByAssembly>
           <Exclude>
             [*]*Program
+            [*]*Program*
+            [Reports.Api]Program
+            [Reports.Api]Reports.Api.Program
             [*]*Startup
             [Reports.Infrastructure]*
             [*]*.Migrations.*
