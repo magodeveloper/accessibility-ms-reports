@@ -7,6 +7,7 @@ using Reports.Api.Middleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Reports.Application.Services.UserContext;
 
@@ -34,7 +35,10 @@ public class MiddlewareTests
         var configuration = new Mock<IConfiguration>();
         configuration.Setup(c => c["Gateway:Secret"]).Returns("test-secret-123");
 
-        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object);
+        var environment = new Mock<IWebHostEnvironment>();
+        environment.Setup(e => e.EnvironmentName).Returns("Production");
+
+        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object, environment.Object);
 
         var context = new DefaultHttpContext();
         context.Request.Headers["X-Gateway-Secret"] = "test-secret-123";
@@ -62,7 +66,10 @@ public class MiddlewareTests
         var configuration = new Mock<IConfiguration>();
         configuration.Setup(c => c["Gateway:Secret"]).Returns("test-secret-123");
 
-        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object);
+        var environment = new Mock<IWebHostEnvironment>();
+        environment.Setup(e => e.EnvironmentName).Returns("Production");
+
+        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object, environment.Object);
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
@@ -95,7 +102,10 @@ public class MiddlewareTests
         var configuration = new Mock<IConfiguration>();
         configuration.Setup(c => c["Gateway:Secret"]).Returns("test-secret-123");
 
-        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object);
+        var environment = new Mock<IWebHostEnvironment>();
+        environment.Setup(e => e.EnvironmentName).Returns("Production");
+
+        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object, environment.Object);
 
         var context = new DefaultHttpContext();
         context.Request.Headers["X-Gateway-Secret"] = "wrong-secret";
@@ -129,7 +139,10 @@ public class MiddlewareTests
         configuration.Setup(c => c["Gateway:Secret"]).Returns((string?)null);
         configuration.Setup(c => c["GATEWAY_SECRET"]).Returns((string?)null);
 
-        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object);
+        var environment = new Mock<IWebHostEnvironment>();
+        environment.Setup(e => e.EnvironmentName).Returns("Development");
+
+        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object, environment.Object);
 
         var context = new DefaultHttpContext();
 
@@ -157,7 +170,10 @@ public class MiddlewareTests
         configuration.Setup(c => c["Gateway:Secret"]).Returns((string?)null);
         configuration.Setup(c => c["GATEWAY_SECRET"]).Returns("env-secret-456");
 
-        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object);
+        var environment = new Mock<IWebHostEnvironment>();
+        environment.Setup(e => e.EnvironmentName).Returns("Production");
+
+        var middleware = new GatewaySecretValidationMiddleware(next, logger, configuration.Object, environment.Object);
 
         var context = new DefaultHttpContext();
         context.Request.Headers["X-Gateway-Secret"] = "env-secret-456";

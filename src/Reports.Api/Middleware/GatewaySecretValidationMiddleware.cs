@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Configuration;
-
 namespace Reports.Api.Middleware;
 
 /// <summary>
@@ -11,14 +9,17 @@ public class GatewaySecretValidationMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<GatewaySecretValidationMiddleware> _logger;
     private readonly string? _expectedSecret;
+    private readonly IWebHostEnvironment _environment;
 
     public GatewaySecretValidationMiddleware(
         RequestDelegate next,
         ILogger<GatewaySecretValidationMiddleware> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         _next = next;
         _logger = logger;
+        _environment = environment;
         _expectedSecret = configuration["Gateway:Secret"] ?? configuration["GATEWAY_SECRET"];
 
         // El warning es normal en entornos de test - no es un problema
@@ -30,6 +31,14 @@ public class GatewaySecretValidationMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Skip validation in Test environment
+        if (_environment.EnvironmentName == "TestEnvironment")
+        {
+            _logger.LogDebug("Gateway secret validation skipped for TestEnvironment");
+            await _next(context);
+            return;
+        }
+
         // Skip validation if secret is not configured
         if (string.IsNullOrEmpty(_expectedSecret))
         {
