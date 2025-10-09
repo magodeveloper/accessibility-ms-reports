@@ -1,9 +1,9 @@
-using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
-using Reports.Infrastructure.Data;
 using Reports.Domain.Entities;
-using Reports.Application.Services.History;
 using Reports.Application.Dtos;
+using Reports.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Reports.Application.Services.History;
 
 namespace Reports.Tests.Application;
 

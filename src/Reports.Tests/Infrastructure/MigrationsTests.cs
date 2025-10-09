@@ -1,12 +1,12 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage;
-using Reports.Infrastructure.Data;
-using Reports.Domain.Entities;
 using FluentAssertions;
+using Reports.Domain.Entities;
+using Reports.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Reports.Tests.Infrastructure;
 
@@ -210,13 +210,13 @@ public class MigrationsTests : IDisposable
         var reportPrimaryKey = reportEntityType!.FindPrimaryKey();
         reportPrimaryKey.Should().NotBeNull();
         reportPrimaryKey!.Properties.Should().HaveCount(1);
-        reportPrimaryKey.Properties.First().Name.Should().Be("Id");
+        reportPrimaryKey.Properties[0].Name.Should().Be("Id");
 
         historyEntityType.Should().NotBeNull();
         var historyPrimaryKey = historyEntityType!.FindPrimaryKey();
         historyPrimaryKey.Should().NotBeNull();
         historyPrimaryKey!.Properties.Should().HaveCount(1);
-        historyPrimaryKey.Properties.First().Name.Should().Be("Id");
+        historyPrimaryKey.Properties[0].Name.Should().Be("Id");
     }
 
     #endregion

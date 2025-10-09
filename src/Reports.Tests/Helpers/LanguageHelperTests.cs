@@ -1,8 +1,8 @@
+using Moq;
+using Xunit;
+using Reports.Api.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using Moq;
-using Reports.Api.Helpers;
-using Xunit;
 
 namespace Reports.Tests.Helpers
 {

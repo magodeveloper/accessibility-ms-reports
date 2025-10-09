@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>5b3d8d54-7ab5-4918-a851-f7069a9b5630</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation" />
@@ -22,6 +23,14 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
     <PackageReference Include="Microsoft.Extensions.Localization" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
+    <!-- JWT Authentication -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <!-- Health Checks -->
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+    <PackageReference Include="AspNetCore.HealthChecks.MySql" />
+    <!-- Prometheus Metrics -->
+    <PackageReference Include="prometheus-net.AspNetCore" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Reports.Application\Reports.Application.csproj" />

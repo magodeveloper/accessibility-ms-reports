@@ -1,9 +1,9 @@
+using System;
+using System.Linq;
 using Reports.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Linq;
 
 namespace Reports.Infrastructure;
 

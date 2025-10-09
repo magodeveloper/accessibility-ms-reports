@@ -1,1751 +1,491 @@
-# 📊 Reports Microservice
+# 📊 Accessibility Reports Service
 
-> **Microservicio de generación de reportes y gestión de historial** para el ecosistema de accesibilidad web empresarial. Construido con .NET 9.0, MySQL y Clean Architecture.
+[![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![Tests](https://img.shields.io/badge/tests-432%2F444-brightgreen)](test-dashboard.html)
+[![Coverage](https://img.shields.io/badge/coverage-94.12%25-brightgreen)](coverage-report/index.html)
+[![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
-## 🚀 Características Principales
+> **Microservicio de generación de reportes de accesibilidad web y gestión de historial desarrollado en .NET 9 con Clean Architecture. Proporciona generación multi-formato, almacenamiento persistente y trazabilidad completa.**
 
-- **🎯 API RESTful Completa**: Gestión integral de reportes e historiales de accesibilidad
-- **📊 Generación Multi-formato**: Reportes en PDF, HTML, JSON y CSV
-- **🏗️ Clean Architecture**: Separación clara entre capas Domain, Application, Infrastructure y API
-- **🗄️ Base de Datos MySQL**: Almacenamiento optimizado con Entity Framework Core 9.0
-- **🌐 Internacionalización**: Soporte completo para español (ES) e inglés (EN)
-- **🔍 Validación Avanzada**: FluentValidation con manejo global de errores
-- **🧪 Testing Integral**: xUnit, InMemory DB y pruebas de integración
-- **🐳 Docker Ready**: Containerización multi-stage optimizada
-- **📖 Documentación OpenAPI**: Swagger/OpenAPI 3.0 interactivo
-- **🔗 Integración Cross-Service**: Comunicación con accessibility-ms-analysis y accessibility-ms-users
+> ⚡ **Nota:** Este microservicio forma parte de un ecosistema donde el **Gateway** gestiona rate limiting, caching (Redis), circuit breaker y load balancing. El microservicio se enfoca en su lógica de dominio específica.
 
----
+## � Descripción
 
-## 📋 Tabla de Contenidos
+Microservicio empresarial para:
 
-### 🏗️ Arquitectura y Estructura
+- **Generación de reportes** en múltiples formatos (PDF, HTML, JSON, CSV)
+- **Almacenamiento persistente** de reportes con MySQL 8.0
+- **Gestión de historial** con trazabilidad completa de operaciones
+- **Consultas avanzadas** por análisis, fecha, formato y usuario
+- **i18n integrado** con soporte multiidioma (es, en)
 
-- [🏗️ Estructura del Proyecto](#️-estructura-del-proyecto)
-- [📊 Modelos de Datos](#-modelos-de-datos)
-- [🗄️ Base de Datos MySQL](#️-base-de-datos-mysql)
-- [� Configuración](#-configuración)
+## ✨ Características
 
-### 🛠️ Desarrollo y Deployment
+### 📊 Gestión de Reportes
 
-- [⚡ Inicio Rápido](#-inicio-rápido)
-- [� Docker y Contenedores](#-docker-y-contenedores)
-- [🧪 Testing](#-testing)
-- [📊 Scripts de Gestión](#-scripts-de-gestión)
+- **Generación multi-formato** (PDF, HTML, JSON, CSV)
+- Consulta avanzada por análisis, fecha, formato
+- Métricas de rendimiento y tasas de éxito
+- Eliminación individual y masiva
+- Almacenamiento persistente en MySQL
 
-### 🌐 API y Funcionalidades
+### 📋 Gestión de Historial
 
-- [� API Endpoints](#-api-endpoints)
-- [� Ejemplos de Uso](#-ejemplos-de-uso)
-- [🌍 Internacionalización](#-internacionalización)
-- [� Seguridad](#-seguridad)
+- **Trazabilidad completa** de operaciones
+- Filtrado por usuario, análisis, fechas
+- Control de acceso por permisos
+- Auditoría integrada
+- Registro detallado de acciones
 
-### � Referencia y Soporte
+### 🔒 Seguridad & Autenticación
 
-- [� Troubleshooting](#-troubleshooting)
-- [📖 Recursos Adicionales](#-recursos-adicionales)
-- [🤝 Contribución](#-contribución)
+- **Autenticación JWT obligatoria** en todos los endpoints
+- Tokens JWT validados con firma digital
+- Control de acceso basado en roles (User/Admin)
+- Gateway Secret para comunicación entre servicios
+- Validación con FluentValidation
+- Protección contra acceso no autorizado
 
----
+### � i18n & Localización
 
-## 🏗️ Estructura del Proyecto
+- Soporte multiidioma (es, en)
+- Detección automática vía `Accept-Language`
+- Mensajes de error localizados
+- Content negotiation automático
+- Sistema extensible para nuevos idiomas
+
+### 🏥 Health Checks & Observabilidad
+
+- Database connectivity check
+- Application health monitoring
+- Memory usage tracking
+- Métricas Prometheus integradas
+- Logging estructurado con Serilog
+
+## 🏗️ Arquitectura
 
 ```
-📦 accessibility-ms-reports/
-├── � coverlet.runsettings           # Configuración de cobertura de código
-├── �📋 Directory.Packages.props       # Gestión centralizada de paquetes NuGet
-├── 🐳 docker-compose.yml            # Orquestación completa de servicios
-├── � Dockerfile                    # Imagen Docker multi-stage optimizada
-├── �️ init-reports-db.sql           # Script de inicialización de base de datos
-├── 🛠️ init-test-databases.ps1|sh     # Scripts para bases de datos de testing
-├── 🧪 manage-tests.ps1               # Script de gestión de pruebas
-├── 📦 package.json                   # Configuración Node.js para herramientas
-├── 📖 README.md                      # Documentación completa del proyecto
-├── 🔧 Reports.sln                    # Solución .NET 9.0 principal
-├── � test-dashboard.html            # Dashboard de resultados de testing
-└── 📁 src/
-    ├── � Reports.Api/               # API Principal y Configuración
-    │   ├── 🚀 Program.cs             # Punto de entrada y configuración DI
-    │   ├── ⚙️ appsettings.json       # Configuración base de la aplicación
-    │   ├── ⚙️ appsettings.Development.json # Configuración de desarrollo
-    │   ├── 📦 Reports.Api.csproj     # Archivo de proyecto de la API
-    │   ├── 🎮 Controllers/           # Controladores REST
-    │   │   ├── ReportController.cs   # Gestión de reportes
-    │   │   └── HistoryController.cs  # Gestión de historial
-    │   ├── 🔧 Helpers/               # Utilidades y extensiones
-    │   │   ├── LanguageHelper.cs     # Soporte de idiomas
-    │   │   └── LocalizationHelper.cs # Configuración de localización
-    │   └── 📁 Resources/             # Archivos de recursos multiidioma
-    │       ├── messages.en.json      # Mensajes en inglés
-    │       └── messages.es.json      # Mensajes en español
-    │
-    ├── 💼 Reports.Application/        # Lógica de Negocio y Servicios
-    │   ├── 📋 DTOs/                  # Data Transfer Objects
-    │   │   ├── ReportRequestDto.cs   # DTO para solicitudes de reporte
-    │   │   ├── ReportResponseDto.cs  # DTO para respuestas de reporte
-    │   │   ├── HistoryRequestDto.cs  # DTO para solicitudes de historial
-    │   │   └── HistoryResponseDto.cs # DTO para respuestas de historial
-    │   ├── 🛡️ Validators/            # Validadores FluentValidation
-    │   │   ├── ReportRequestValidator.cs # Validaciones de reportes
-    │   │   └── HistoryRequestValidator.cs # Validaciones de historial
-    │   └── ⚙️ Services/              # Servicios de aplicación
-    │       ├── IReportService.cs     # Interfaz del servicio de reportes
-    │       ├── ReportService.cs      # Implementación del servicio de reportes
-    │       ├── IHistoryService.cs    # Interfaz del servicio de historial
-    │       └── HistoryService.cs     # Implementación del servicio de historial
-    │
-    ├── 🏛️ Reports.Domain/            # Entidades y Reglas de Dominio
-    │   ├── 📊 Entities/              # Entidades del dominio
-    │   │   ├── Report.cs             # Entidad principal de reporte
-    │   │   └── History.cs            # Entidad de historial
-    │   └── 📋 Enums/                 # Enumeraciones del dominio
-    │       ├── ReportFormat.cs       # Formatos de reporte (PDF, HTML, JSON)
-    │       ├── ReportStatus.cs       # Estados de reporte
-    │       └── HistoryType.cs        # Tipos de historial
-    │
-    ├── 🔌 Reports.Infrastructure/     # Acceso a Datos y Servicios Externos
-    │   ├── 🗃️ Data/                 # Configuración de Entity Framework
-    │   │   ├── ReportsDbContext.cs   # Contexto principal de la base de datos
-    │   │   └── Configurations/       # Configuraciones de entidades
-    │   │       ├── ReportConfiguration.cs # Configuración de entidad Report
-    │   │       └── HistoryConfiguration.cs # Configuración de entidad History
-    │   ├── 🔄 Migrations/            # Migraciones de base de datos
-    │   │   ├── 001_InitialCreate.cs  # Migración inicial
-    │   │   └── [Timestamp]_*.cs      # Migraciones adicionales
-    │   └── 📦 ServiceRegistration.cs # Registro de servicios de infraestructura
-    │
-    └── 🧪 Reports.Tests/             # Suite de Pruebas Automatizadas
-        ├── 📦 Reports.Tests.csproj   # Archivo de proyecto de pruebas
-        ├── 🌐 ReportsApiTests.cs     # Pruebas de la API principal
-        ├── 🎮 Controllers/           # Pruebas de controladores
-        │   ├── ReportControllerTests.cs # Tests del controlador de reportes
-        │   └── HistoryControllerTests.cs # Tests del controlador de historial
-        ├── 💼 Application/           # Pruebas de servicios de aplicación
-        │   ├── ReportServiceTests.cs # Tests del servicio de reportes
-        │   └── HistoryServiceTests.cs # Tests del servicio de historial
-        ├── 🏛️ Domain/               # Pruebas de entidades del dominio
-        │   └── DomainEntitiesTests.cs # Tests de entidades
-        ├── � Dtos/                  # Pruebas de DTOs
-        │   └── DtoInstantiationTests.cs # Tests de instanciación de DTOs
-        ├── � Helpers/               # Pruebas de utilidades
-        │   ├── LanguageHelperTests.cs # Tests de helper de idiomas
-        │   └── LocalizationHelperTests.cs # Tests de localización
-        ├── 🔌 Infrastructure/        # Pruebas de infraestructura
-        │   ├── ReportsDbContextTests.cs # Tests del contexto de BD
-        │   ├── EntityConfigurationTests.cs # Tests de configuraciones EF
-        │   ├── MigrationsTests.cs    # Tests de migraciones
-        │   ├── DatabasePerformanceTests.cs # Tests de rendimiento
-        │   ├── ServiceRegistrationTests.cs # Tests de registro de servicios
-        │   └── ReportsTestWebApplicationFactory.cs # Factory para tests
-        ├── 🔗 IntegrationTests/      # Pruebas de integración
-        │   └── ReportManagementIntegrationTests.cs # Tests end-to-end
-        └── 🧪 UnitTests/             # Pruebas unitarias específicas
-            ├── ExtendedLocalizationTests.cs # Tests de localización avanzada
-            ├── ProgramUnitTests.cs   # Tests del punto de entrada
-            └── Services/             # Tests unitarios de servicios
-                ├── ReportServiceTests.cs # Tests unitarios de reportes
-                └── HistoryServiceTests.cs # Tests unitarios de historial
+┌───────────────────────────────────────────────────┐
+│         📊 REPORTS MICROSERVICE API               │
+│                (Port 5003)                        │
+│                                                   │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────┐ │
+│  │ Controllers │  │  Middleware │  │  Health  │ │
+│  │  (2 APIs)   │  │  (Context)  │  │  Checks  │ │
+│  └─────────────┘  └─────────────┘  └──────────┘ │
+│         │                │               │       │
+│         └────────────────┴───────────────┘       │
+│                      │                           │
+│              ┌───────▼───────┐                   │
+│              │  APPLICATION  │                   │
+│              │   Services    │                   │
+│              │ Localization  │                   │
+│              └───────┬───────┘                   │
+│                      │                           │
+│              ┌───────▼───────┐                   │
+│              │    DOMAIN     │                   │
+│              │   Entities    │                   │
+│              │  Interfaces   │                   │
+│              └───────┬───────┘                   │
+│                      │                           │
+│              ┌───────▼───────┐                   │
+│              │INFRASTRUCTURE │                   │
+│              │   EF Core     │                   │
+│              │   Repositories│                   │
+│              └───────┬───────┘                   │
+└──────────────────────┼───────────────────────────┘
+                       │
+                       ▼
+               ┌──────────────┐
+               │  MySQL DB    │
+               │(reports_db)  │
+               └──────────────┘
 ```
 
-## 📊 Modelos de Datos
+**Clean Architecture con 4 capas:**
 
-### � Entidad Report
+- **API:** Controllers, Middleware, Health Checks
+- **Application:** Services, DTOs, Localization, Use Cases
+- **Domain:** Entities (Report, History), Interfaces, Business Logic
+- **Infrastructure:** EF Core, Repositories, MySQL
 
-```csharp
-public class Report
-{
-    public int Id { get; set; }
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public ReportFormat Format { get; set; }
-    public ReportStatus Status { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime? CompletedAt { get; set; }
-    public string CreatedBy { get; set; }
-    public string FilePath { get; set; }
-    public long FileSize { get; set; }
-    public string Language { get; set; } // "es-ES" | "en-US"
+## 🚀 Quick Start
 
-    // Metadatos del reporte
-    public string SourceAnalysisId { get; set; }
-    public int TotalIssues { get; set; }
-    public int CriticalIssues { get; set; }
-    public int WarningIssues { get; set; }
-    public int InfoIssues { get; set; }
+### Requisitos
 
-    // Navegación
-    public ICollection<History> Histories { get; set; }
-}
-```
+- .NET 9.0 SDK
+- MySQL 8.0+
+- Docker & Docker Compose (opcional)
 
-### 📈 Entidad History
-
-```csharp
-public class History
-{
-    public int Id { get; set; }
-    public int ReportId { get; set; }
-    public HistoryType Type { get; set; }
-    public string Action { get; set; }
-    public DateTime Timestamp { get; set; }
-    public string UserId { get; set; }
-    public string UserName { get; set; }
-    public string Details { get; set; }
-    public string IpAddress { get; set; }
-    public string UserAgent { get; set; }
-
-    // Navegación
-    public Report Report { get; set; }
-}
-```
-
-### 📋 Enumeraciones
-
-#### ReportFormat
-
-```csharp
-public enum ReportFormat
-{
-    PDF = 1,     // Documento PDF optimizado
-    HTML = 2,    // Página web interactiva
-    JSON = 3,    // Datos estructurados API
-    CSV = 4      // Datos tabulares Excel
-}
-```
-
-#### ReportStatus
-
-```csharp
-public enum ReportStatus
-{
-    PENDING = 1,     // En cola de generación
-    GENERATING = 2,  // Procesando
-    COMPLETED = 3,   // Generado exitosamente
-    FAILED = 4,      // Error en generación
-    EXPIRED = 5      // Caducado (>30 días)
-}
-```
-
-#### HistoryType
-
-```csharp
-public enum HistoryType
-{
-    GENERATION = 1,  // Generación de reporte
-    DOWNLOAD = 2,    // Descarga de reporte
-    DELETION = 3,    // Eliminación de reporte
-    SHARING = 4      // Compartir reporte
-}
-```
-
-## 🗄️ Base de Datos MySQL
-
-### 📊 Esquema de Base de Datos
-
-```sql
--- Tabla Reports
-CREATE TABLE Reports (
-    Id INT AUTO_INCREMENT PRIMARY KEY,
-    Title VARCHAR(255) NOT NULL,
-    Description TEXT,
-    Format ENUM('PDF', 'HTML', 'JSON', 'CSV') NOT NULL DEFAULT 'PDF',
-    Status ENUM('PENDING', 'GENERATING', 'COMPLETED', 'FAILED', 'EXPIRED') NOT NULL DEFAULT 'PENDING',
-    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CompletedAt DATETIME NULL,
-    CreatedBy VARCHAR(100) NOT NULL,
-    FilePath VARCHAR(500),
-    FileSize BIGINT DEFAULT 0,
-    Language VARCHAR(10) NOT NULL DEFAULT 'es-ES',
-    SourceAnalysisId VARCHAR(100),
-    TotalIssues INT DEFAULT 0,
-    CriticalIssues INT DEFAULT 0,
-    WarningIssues INT DEFAULT 0,
-    InfoIssues INT DEFAULT 0,
-
-    INDEX idx_reports_status (Status),
-    INDEX idx_reports_created_by (CreatedBy),
-    INDEX idx_reports_created_at (CreatedAt),
-    INDEX idx_reports_language (Language),
-    INDEX idx_reports_source_analysis (SourceAnalysisId)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabla History
-CREATE TABLE History (
-    Id INT AUTO_INCREMENT PRIMARY KEY,
-    ReportId INT NOT NULL,
-    Type ENUM('GENERATION', 'DOWNLOAD', 'DELETION', 'SHARING') NOT NULL,
-    Action VARCHAR(255) NOT NULL,
-    Timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UserId VARCHAR(100) NOT NULL,
-    UserName VARCHAR(255),
-    Details TEXT,
-    IpAddress VARCHAR(45),
-    UserAgent VARCHAR(500),
-
-    INDEX idx_history_report_id (ReportId),
-    INDEX idx_history_user_id (UserId),
-    INDEX idx_history_timestamp (Timestamp),
-    INDEX idx_history_type (Type),
-
-    FOREIGN KEY (ReportId) REFERENCES Reports(Id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
-
-### 🔧 Configuración de Entity Framework
-
-```csharp
-// Reports.Infrastructure/Data/ReportsDbContext.cs
-public class ReportsDbContext : DbContext
-{
-    public ReportsDbContext(DbContextOptions<ReportsDbContext> options) : base(options) { }
-
-    public DbSet<Report> Reports { get; set; }
-    public DbSet<History> History { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ReportsDbContext).Assembly);
-        base.OnModelCreating(modelBuilder);
-    }
-}
-```
-
-### 🚀 Migraciones
+### Instalación Local
 
 ```bash
-# Crear nueva migración
-dotnet ef migrations add InitialCreate --project src/Reports.Infrastructure --startup-project src/Reports.Api
-
-# Aplicar migraciones
-dotnet ef database update --project src/Reports.Infrastructure --startup-project src/Reports.Api
-
-# Generar script SQL
-dotnet ef migrations script --project src/Reports.Infrastructure --startup-project src/Reports.Api
-```
-
-## 🔧 Configuración
-
-### ⚙️ Variables de Entorno
-
-```bash
-# === APLICACIÓN ===
-ASPNETCORE_ENVIRONMENT=Development
-ASPNETCORE_URLS=http://+:5003
-
-# === BASE DE DATOS ===
-ConnectionStrings__DefaultConnection=Server=localhost;Port=3309;Database=reportsdb;Uid=reportsuser;Pwd=ReportsApp2025SecurePass;
-DB_NAME=reportsdb
-DB_USER=reportsuser
-DB_PASSWORD=ReportsApp2025SecurePass
-DB_ROOT_PASSWORD=cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiN
-DB_PORT=3309
-
-# === CONFIGURACIÓN DEL SERVICIO ===
-API_HOST_PORT=5003
-API_VERSION=v1
-ENABLE_SWAGGER=true
-
-# === CROSS-MICROSERVICES ===
-ANALYSIS_API_URL=http://accessibility-ms-analysis:5002
-USERS_API_URL=http://accessibility-ms-users:5001
-
-# === GENERACIÓN DE REPORTES ===
-MAX_REPORT_SIZE_MB=50
-REPORT_RETENTION_DAYS=30
-CONCURRENT_REPORTS_LIMIT=10
-DEFAULT_REPORT_FORMAT=PDF
-
-# === INTERNACIONALIZACIÓN ===
-DEFAULT_CULTURE=es-ES
-SUPPORTED_CULTURES=es-ES,en-US
-ENABLE_LOCALIZATION=true
-
-# === LOGGING ===
-SERILOG_MINIMUM_LEVEL=Information
-SERILOG_FILE_PATH=/app/logs/reports-{Date}.log
-SERILOG_RETENTION_DAYS=30
-```
-
-### 🏗️ Configuración de Desarrollo (appsettings.Development.json)
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Port=3309;Database=reportsdb;Uid=reportsuser;Pwd=ReportsApp2025SecurePass;"
-  },
-  "CrossMicroservices": {
-    "AnalysisApiUrl": "http://localhost:5002",
-    "UsersApiUrl": "http://localhost:5001",
-    "TimeoutSeconds": 30
-  },
-  "ReportGeneration": {
-    "MaxReportSizeMB": 50,
-    "RetentionDays": 30,
-    "ConcurrentReportsLimit": 10,
-    "DefaultFormat": "PDF",
-    "OutputPath": "./reports",
-    "TemplatePath": "./templates"
-  },
-  "Localization": {
-    "DefaultCulture": "es-ES",
-    "SupportedCultures": ["es-ES", "en-US"],
-    "ResourcePath": "Resources"
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning",
-      "Microsoft.EntityFrameworkCore": "Information"
-    }
-  },
-  "AllowedHosts": "*"
-}
-```
-
-### 🚀 Configuración de Producción (appsettings.json)
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Uid=${DB_USER};Pwd=${DB_PASSWORD};"
-  },
-  "CrossMicroservices": {
-    "AnalysisApiUrl": "${ANALYSIS_API_URL}",
-    "UsersApiUrl": "${USERS_API_URL}",
-    "TimeoutSeconds": 60
-  },
-  "ReportGeneration": {
-    "MaxReportSizeMB": 100,
-    "RetentionDays": 90,
-    "ConcurrentReportsLimit": 20,
-    "DefaultFormat": "PDF",
-    "OutputPath": "/app/reports",
-    "TemplatePath": "/app/templates"
-  },
-  "Localization": {
-    "DefaultCulture": "es-ES",
-    "SupportedCultures": ["es-ES", "en-US", "pt-BR", "fr-FR"],
-    "ResourcePath": "Resources"
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Warning",
-      "Microsoft.AspNetCore": "Warning",
-      "Microsoft.EntityFrameworkCore": "Error"
-    }
-  },
-  "AllowedHosts": "*"
-}
-```
-
-## ⚡ Inicio Rápido
-
-### 🛠️ Prerrequisitos
-
-- **.NET 9.0 SDK** - [Descargar](https://dotnet.microsoft.com/download/dotnet/9.0)
-- **MySQL 8.4+** - [Descargar](https://dev.mysql.com/downloads/mysql/)
-- **Docker Desktop** (opcional) - [Descargar](https://www.docker.com/products/docker-desktop)
-- **Visual Studio 2022** o **VS Code** con extensión C#
-
-### 🚀 Instalación Local
-
-```bash
-# 1. Clonar el repositorio
-git clone <repository-url>
+# Clonar repositorio
+git clone https://github.com/magodeveloper/accessibility-ms-reports.git
 cd accessibility-ms-reports
 
+# Configurar base de datos
+mysql -u root -p < init-reports-db.sql
+
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales de MySQL
+
+# Restaurar dependencias
 dotnet restore
 
-# 3. Configurar base de datos
-# Editar appsettings.Development.json con tu configuración MySQL
+# Compilar
+dotnet build --configuration Release
 
-# 4. Ejecutar migraciones
-dotnet ef database update --project src/Reports.Infrastructure --startup-project src/Reports.Api
-
-# 5. Ejecutar la aplicación
-dotnet run --project src/Reports.Api
+# Ejecutar
+dotnet run --project src/Reports.Api/Reports.Api.csproj
 ```
 
-### 🐳 Instalación con Docker
+### Uso con Docker Compose
 
 ```bash
-# 1. Construir y ejecutar con Docker Compose
+# Levantar todos los servicios
 docker-compose up -d
 
-# 2. Verificar que los servicios están funcionando
+# Ver logs
+docker-compose logs -f reports-api
+
+# Verificar estado
 docker-compose ps
 
-# 3. Ver logs
-docker-compose logs reports-api
-
-# 4. Acceder a la API
-# http://localhost:5003/swagger
+# Detener servicios
+docker-compose down
 ```
 
-### 🌐 Verificación de Instalación
+### Verificación
 
 ```bash
-# Verificar estado de la API
+# Health check (no requiere autenticación)
 curl http://localhost:5003/health
 
-# Verificar endpoints principales
-curl http://localhost:5003/api/v1/reports
-curl http://localhost:5003/api/v1/history
+# Obtener token JWT del microservicio de usuarios
+curl -X POST http://localhost:8081/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"Password123!"}'
+
+# Crear reporte (requiere autenticación JWT)
+curl -X POST http://localhost:5003/api/report \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"analysisId":"test-123","format":"PDF","userId":"user-1"}'
 ```
+
+> ⚠️ **Nota:** Todos los endpoints de la API requieren autenticación JWT excepto los health checks.
+
+## 📡 API Endpoints
+
+> 🔐 **Todos los endpoints requieren autenticación JWT** mediante el header `Authorization: Bearer {token}`
+
+### 📊 Reports (/api/report)
+
+| Método | Endpoint                         | Descripción                     | Auth |
+| ------ | -------------------------------- | ------------------------------- | ---- |
+| GET    | `/api/report`                    | Listar todos los reportes       | ✅   |
+| GET    | `/api/report/by-analysis/{id}`   | Buscar reportes por análisis ID | ✅   |
+| GET    | `/api/report/by-date/{date}`     | Buscar reportes por fecha       | ✅   |
+| GET    | `/api/report/by-format/{format}` | Buscar reportes por formato     | ✅   |
+| POST   | `/api/report`                    | Crear nuevo reporte             | ✅   |
+| DELETE | `/api/report/{id}`               | Eliminar reporte por ID         | ✅   |
+| DELETE | `/api/report/all`                | Eliminar todos los reportes     | ✅   |
+
+### 📋 History (/api/history)
+
+| Método | Endpoint                        | Descripción                               | Auth     |
+| ------ | ------------------------------- | ----------------------------------------- | -------- |
+| GET    | `/api/history`                  | Listar historial del usuario actual       | ✅       |
+| GET    | `/api/history/by-user/{id}`     | Buscar historial por usuario (Admin)      | ✅ Admin |
+| GET    | `/api/history/by-analysis/{id}` | Buscar historial por análisis ID          | ✅       |
+| POST   | `/api/history`                  | Crear registro de historial               | ✅       |
+| DELETE | `/api/history/{id}`             | Eliminar registro de historial por ID     | ✅       |
+| DELETE | `/api/history/all`              | Eliminar todos los registros de historial | ✅       |
+
+### 🏥 Health (/health)
+
+| Método | Endpoint        | Descripción          |
+| ------ | --------------- | -------------------- |
+| GET    | `/health`       | Health check general |
+| GET    | `/health/ready` | Readiness probe      |
+| GET    | `/health/live`  | Liveness probe       |
+
+**Total: 16 endpoints disponibles**
 
 ## 🧪 Testing
 
-### 🎯 Estrategia de Testing
+### Estado de Cobertura
+
+**Estado General:** ✅ 432/444 tests exitosos (97.3%)  
+**Cobertura Total:** 94.12% (769/817 líneas cubiertas)
+
+| Capa                       | Cobertura | Tests            | Estado |
+| -------------------------- | --------- | ---------------- | ------ |
+| **Reports.Api**            | 93.96%    | Controllers + MW | ✅     |
+| ReportController           | 95%+      | CRUD Reportes    | ✅     |
+| HistoryController          | 92%+      | CRUD Historial   | ✅     |
+| **Reports.Application**    | 94.28%    | Services + DTOs  | ✅     |
+| ReportService              | 95%+      | Lógica Reportes  | ✅     |
+| HistoryService             | 93%+      | Lógica Historial | ✅     |
+| **Reports.Domain**         | 100%      | Entities         | ✅     |
+| Report Entity              | 100%      | Validaciones     | ✅     |
+| History Entity             | 100%      | Validaciones     | ✅     |
+| **Reports.Infrastructure** | 0%        | Excluido         | ⚠️     |
+
+**Métricas detalladas:**
+
+- **Cobertura de líneas:** 94.12% (769/817)
+- **Cobertura de ramas:** 81.87%
+- **Tiempo de ejecución:** ~20s para 444 tests
+- **Tasa de éxito:** 97.3% (432/444)
+
+### Comandos de Testing
 
 ```bash
-# Ejecutar todas las pruebas
-dotnet test
+# Todos los tests con cobertura
+.\manage-tests.ps1 -GenerateCoverage -OpenReport
 
-# Pruebas con cobertura de código
-dotnet test --collect:"XPlat Code Coverage"
+# Solo tests unitarios
+.\manage-tests.ps1 -TestType Unit
 
-# Pruebas específicas por categoría
-dotnet test --filter "Category=Unit"
-dotnet test --filter "Category=Integration"
+# Tests de integración
+.\manage-tests.ps1 -TestType Integration
 
-# Pruebas de un proyecto específico
-dotnet test src/Reports.Tests/
+# Ver dashboard interactivo
+Start-Process .\test-dashboard.html
 ```
 
-### 📊 Scripts de Gestión
+### Categorías de Tests
 
-#### PowerShell (Windows)
+**Unit Tests:**
 
-```powershell
-# manage-tests.ps1
-./manage-tests.ps1 -Action "coverage" -Format "html"
-./manage-tests.ps1 -Action "run" -Filter "Integration"
-./manage-tests.ps1 -Action "clean"
+- Validación de entidades (Report, History)
+- Lógica de servicios (ReportService, HistoryService)
+- DTOs y mappers
+- Validadores de dominio
+- Localización y mensajes
+
+**Integration Tests:**
+
+- Controllers con base de datos en memoria
+- Repositorios con MySQL real
+- Health checks completos
+- Middleware de contexto
+- Generación de reportes multi-formato
+
+**E2E Tests:**
+
+- Flujos completos de generación de reportes
+- Consultas avanzadas por múltiples criterios
+- Gestión de historial de operaciones
+- Eliminación en cascada
+
+## 🐳 Deployment
+
+### Docker
+
+```dockerfile
+# Build image
+docker build -t accessibility-reports:latest .
+
+# Run standalone
+docker run -d \
+  --name reports-api \
+  -p 5003:8080 \
+  -e ConnectionStrings__ReportsDb="Server=mysql;Database=accessibility_reports;..." \
+  -e GatewaySecret="your-secret-key" \
+  accessibility-reports:latest
 ```
 
-#### Bash (Linux/macOS)
-
-```bash
-# Ejecutar suite completa
-./manage-tests.sh --action=coverage --format=html
-
-# Pruebas específicas
-./manage-tests.sh --action=run --filter="Unit"
-```
-
-### 🎯 Tipos de Testing Implementados
-
-| Tipo            | Descripción               | Cobertura | Herramientas                 |
-| --------------- | ------------------------- | --------- | ---------------------------- |
-| **Unitarias**   | Lógica de negocio aislada | 95%+      | xUnit, Moq, FluentAssertions |
-| **Integración** | API endpoints y DB        | 90%+      | TestServer, InMemory DB      |
-| **Performance** | Rendimiento y carga       | 85%+      | NBomber, BenchmarkDotNet     |
-| **E2E**         | Flujos completos          | 80%+      | TestWebApplicationFactory    |
-
-## 📝 Ejemplos de Uso
-
-### 🚀 Crear un Reporte
-
-```bash
-# POST /api/v1/reports
-curl -X POST "http://localhost:5003/api/v1/reports" \
-  -H "Content-Type: application/json" \
-  -H "Accept-Language: es-ES" \
-  -d '{
-    "title": "Análisis de Accesibilidad Web",
-    "description": "Reporte completo basado en WCAG 2.1",
-    "format": "PDF",
-    "language": "es-ES",
-    "sourceAnalysisId": "analysis_123",
-    "createdBy": "admin@empresa.com"
-  }'
-```
-
-**Respuesta:**
-
-```json
-{
-  "success": true,
-  "message": "Reporte creado exitosamente",
-  "data": {
-    "id": 1,
-    "title": "Análisis de Accesibilidad Web",
-    "status": "PENDING",
-    "format": "PDF",
-    "createdAt": "2024-01-15T10:30:00Z"
-  }
-}
-```
-
-### 📊 Obtener Reportes
-
-```bash
-# GET /api/v1/reports
-curl "http://localhost:5003/api/v1/reports?page=1&pageSize=10&status=COMPLETED"
-
-# GET /api/v1/reports/{id}
-curl "http://localhost:5003/api/v1/reports/1"
-```
-
-### 📈 Gestionar Historial
-
-```bash
-# GET /api/v1/history
-curl "http://localhost:5003/api/v1/history?reportId=1&type=GENERATION"
-
-# POST /api/v1/history
-curl -X POST "http://localhost:5003/api/v1/history" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "reportId": 1,
-    "type": "DOWNLOAD",
-    "action": "Reporte descargado por usuario",
-    "userId": "user123",
-    "userName": "Juan Pérez"
-  }'
-```
-
-## 🌍 Internacionalización
-
-### 🗺️ Idiomas Soportados
-
-| Idioma  | Código  | Estado      | Cobertura |
-| ------- | ------- | ----------- | --------- |
-| Español | `es-ES` | ✅ Completo | 100%      |
-| Inglés  | `en-US` | ✅ Completo | 100%      |
-
-### 📁 Archivos de Recursos
-
-```
-src/Reports.Api/Resources/
-├── messages.es.json      # Mensajes en español
-├── messages.en.json      # Mensajes en inglés
-└── SharedLocalizer.cs    # Clase de localización
-```
-
-### 🔧 Configuración
-
-```json
-{
-  "Localization": {
-    "DefaultCulture": "es-ES",
-    "SupportedCultures": ["es-ES", "en-US"],
-    "ResourcePath": "Resources"
-  }
-}
-```
-
-## 🔒 Seguridad
-
-### 🛡️ Medidas de Seguridad Implementadas
-
-- **Validación de entrada**: FluentValidation en todos los endpoints
-- **Rate limiting**: Límites por IP y usuario
-- **CORS**: Configuración restrictiva por entorno
-- **Logs de auditoría**: Registro completo de actividades
-- **Sanitización**: Limpieza de nombres de archivo y rutas
-- **HTTPS**: Obligatorio en producción
-
-### 🔑 Variables de Entorno Seguras
-
-```bash
-# Usar variables de entorno para datos sensibles
-DB_PASSWORD=${REPORTS_DB_PASSWORD}
-JWT_SECRET=${REPORTS_JWT_SECRET}
-
-# No incluir credenciales en código o logs
-```
-
-## 🔧 Troubleshooting
-
-### ❌ Problemas Comunes
-
-#### Error de conexión a base de datos
-
-```bash
-# Verificar estado del contenedor
-docker-compose ps
-
-# Ver logs de MySQL
-docker-compose logs reports-db
-
-# Probar conexión manualmente
-mysql -h localhost -P 3309 -u reportsuser -p
-```
-
-#### Timeout en generación de reportes
-
-```bash
-# Aumentar timeout en configuración
-REPORT_GENERATION_TIMEOUT_MS=120000
-
-# Verificar memoria disponible
-docker stats accessibility-reports-api
-```
-
-#### Error de permisos en archivos
-
-```bash
-# Verificar permisos del directorio de reportes
-ls -la /app/reports
-
-# Corregir permisos
-chown -R www-data:www-data /app/reports
-chmod -R 755 /app/reports
-```
-
-### 🔍 Comandos de Diagnóstico
-
-```bash
-# Health check
-curl http://localhost:5003/health
-
-# Verificar configuración
-curl http://localhost:5003/api/v1/config
-
-# Ver métricas
-curl http://localhost:5003/metrics
-
-# Logs de la aplicación
-docker-compose logs -f reports-api
-```
-
-## 📖 Recursos Adicionales
-
-### 📚 Documentación
-
-- [Entity Framework Core](https://docs.microsoft.com/ef/core/) - ORM utilizado
-- [ASP.NET Core](https://docs.microsoft.com/aspnet/core/) - Framework web
-- [Docker](https://docs.docker.com/) - Containerización
-- [MySQL](https://dev.mysql.com/doc/) - Base de datos
-
-### 🛠️ Herramientas de Desarrollo
-
-- **Visual Studio 2022** - IDE recomendado
-- **Visual Studio Code** - Editor alternativo
-- **Postman** - Testing de API
-- **Docker Desktop** - Containerización local
-
-### 🧪 Testing
-
-- **xUnit** - Framework de testing
-- **Moq** - Mocking library
-- **FluentAssertions** - Assertions fluidas
-- **TestContainers** - Testing con contenedores
-
-## 🤝 Contribución
-
-### 🚀 Cómo Contribuir
-
-1. **Fork** del repositorio
-2. **Crear branch** para nueva funcionalidad
-3. **Implementar** cambios con tests
-4. **Documentar** cambios realizados
-5. **Crear Pull Request** con descripción detallada
-
-### 📋 Estándares de Código
-
-- **Clean Code**: Código limpio y legible
-- **SOLID Principles**: Principios de diseño orientado a objetos
-- **Clean Architecture**: Separación clara de responsabilidades
-- **Unit Testing**: Cobertura mínima del 80%
-- **Documentation**: Comentarios y README actualizados
-
-### 🐛 Reportar Issues
-
-- Usar **GitHub Issues** para reportar bugs
-- Incluir **logs relevantes** y **pasos para reproducir**
-- Especificar **versión** y **entorno**
-- Usar **labels** apropiadas
-
----
-
-> **📊 Reports Microservice** - Versión 1.0.0  
-> Desarrollado con ❤️ usando .NET 9.0, MySQL y Clean Architecture  
-> 📅 Última actualización: Enero 2025
-
----
-
-dotnet restore
-
-# 3. Configurar base de datos
-
-# Editar appsettings.Development.json con tu configuración MySQL
-
-# 4. Ejecutar migraciones
-
-dotnet ef database update --project src/Reports.Infrastructure --startup-project src/Reports.Api
-
-# 5. Ejecutar la aplicación
-
-dotnet run --project src/Reports.Api
-
-````
-
-### 🐳 Instalación con Docker
-
-```bash
-# 1. Construir y ejecutar con Docker Compose
-docker-compose up -d
-
-# 2. Verificar que los servicios están funcionando
-docker-compose ps
-
-# 3. Ver logs
-docker-compose logs reports-api
-
-# 4. Acceder a la API
-# http://localhost:5003/swagger
-````
-
-### 🌐 Verificación de Instalación
-
-```bash
-# Verificar estado de la API
-curl http://localhost:5003/health
-
-# Verificar endpoints principales
-curl http://localhost:5003/api/v1/reports
-curl http://localhost:5003/api/v1/history
-```
-
-```bash
-# Restaurar dependencias NuGet
-dotnet restore Reports.sln
-
-# Compilar en modo desarrollo
-dotnet build Reports.sln --configuration Debug
-
-# Ejecutar con recarga automática
-dotnet watch run --project src/Reports.Api --environment Development
-
-# Ejecutar en puerto específico
-dotnet run --project src/Reports.Api --urls "http://localhost:8083"
-```
-
-### 🏗️ Build optimizado
-
-```bash
-# Compilación optimizada para producción
-dotnet build Reports.sln --configuration Release --no-restore
-
-# Build con análisis de código
-dotnet build Reports.sln -c Release --verbosity detailed
-
-# Publicación optimizada
-dotnet publish src/Reports.Api -c Release -o ./publish --self-contained false
-```
-
-### ✅ Ejecución de pruebas
-
-```bash
-# Todas las pruebas con output detallado
-dotnet test Reports.sln --verbosity normal --configuration Release
-
-# Solo pruebas de integración
-dotnet test src/Reports.Tests --filter Category=Integration
-
-# Pruebas con reporte de cobertura
-dotnet test Reports.sln --collect:"XPlat Code Coverage" --results-directory TestResults
-
-# Generar reporte HTML de cobertura
-reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:Html
-```
-
-## 🗄️ Base de datos y arquitectura
-
-### 📊 Estructura de datos optimizada
-
-El microservicio utiliza **MySQL 8.4** con Entity Framework Core y gestiona reportes e historial:
-
-```
-📊 REPORTS (tabla principal)
-├── 📋 Relación con ANALYSIS (cross-microservice)
-└── 📈 HISTORY (tracking de actividades)
-    └── 👤 Relación con USERS (cross-microservice)
-```
-
-**Tablas principales:**
-
-- **REPORTS** → Información de reportes generados con metadatos
-- **HISTORY** → Historial de actividades y auditoría de reportes
-
-### ⚡ Optimizaciones de rendimiento
-
-**🔍 Índices especializados implementados:**
-
-```sql
--- Consultas por análisis (más común)
-CREATE INDEX idx_reports_analysis ON REPORTS(analysis_id);
-CREATE INDEX idx_reports_format_date ON REPORTS(format, generation_date);
-CREATE INDEX idx_reports_status ON REPORTS(status);
-
--- Historial por usuario y análisis
-CREATE INDEX idx_history_user ON HISTORY(user_id);
-CREATE INDEX idx_history_analysis ON HISTORY(analysis_id);
-CREATE INDEX idx_history_type_date ON HISTORY(history_type, created_at);
-
--- Búsquedas por fecha (reportes y auditoría)
-CREATE INDEX idx_reports_generation_date ON REPORTS(generation_date);
-CREATE INDEX idx_history_created_at ON HISTORY(created_at);
-```
-
-**🔗 Integridad referencial cross-microservice:**
-
-```sql
--- Relación con accessibility-ms-analysis
-ALTER TABLE REPORTS ADD CONSTRAINT fk_reports_analysis
-FOREIGN KEY (analysis_id) REFERENCES analysisdb.ANALYSIS(id) ON DELETE CASCADE;
-
--- Relación con accessibility-ms-users (a través de history)
-ALTER TABLE HISTORY ADD CONSTRAINT fk_history_user
-FOREIGN KEY (user_id) REFERENCES usersdb.USERS(id) ON DELETE CASCADE;
-
--- Cascada interna: Reports → History
-ALTER TABLE HISTORY ADD CONSTRAINT fk_history_analysis
-FOREIGN KEY (analysis_id) REFERENCES REPORTS(analysis_id) ON DELETE CASCADE;
-```
-
-### 🔄 Gestión de migraciones
-
-```bash
-# Aplicar todas las migraciones pendientes
-dotnet ef database update --project src/Reports.Infrastructure --startup-project src/Reports.Api
-
-# Generar nueva migración
-dotnet ef migrations add NombreMigracion --project src/Reports.Infrastructure --startup-project src/Reports.Api
-
-# Generar script SQL para revisión
-dotnet ef migrations script --project src/Reports.Infrastructure --startup-project src/Reports.Api
-
-# Rollback a migración específica
-dotnet ef database update NombreMigracionAnterior --project src/Reports.Infrastructure --startup-project src/Reports.Api
-```
-
-> ⚠️ **Prerequisito importante**: Las constraints cross-microservice requieren que **accessibility-ms-analysis** y **accessibility-ms-users** estén funcionando y sus bases de datos creadas.
-
-### 🧪 Base de datos de test
-
-Para las pruebas se crean automáticamente bases de datos temporales:
+### Docker Compose
 
 ```yaml
-# Test Configuration
-services:
-  database-test:
-    image: mysql:8.4
-    environment:
-      MYSQL_ROOT_PASSWORD: fK7SP6bZYRMMbdB6azbrpPtX9gfGGZlQ
-      MYSQL_USER: testuser
-      MYSQL_PASSWORD: TestApp2025SecurePass
-    ports:
-      - "3310:3306"
-    volumes:
-      - ./init-test-databases.sql:/docker-entrypoint-initdb.d/init.sql
-```
+version: "3.8"
 
-**🛠️ Scripts de inicialización disponibles:**
-
-- `init-test-databases.ps1` (Windows PowerShell)
-- `init-test-databases.sh` (Linux/macOS)
-
-## 🌐 API endpoints y ejemplos
-
-### 📊 Endpoints de reportes
-
-| 🎯 Acción                 | Método   | Endpoint                               | Descripción                                    |
-| ------------------------- | -------- | -------------------------------------- | ---------------------------------------------- |
-| **Crear reporte**         | `POST`   | `/api/report`                          | Genera nuevo reporte de accesibilidad          |
-| **Obtener reporte**       | `GET`    | `/api/report/{id}`                     | Recupera reporte específico con metadatos      |
-| **Reportes por análisis** | `GET`    | `/api/report/by-analysis/{analysisId}` | Obtiene reportes de un análisis específico     |
-| **Reportes por fecha**    | `GET`    | `/api/report/by-date/{date}`           | Obtiene reportes generados en fecha específica |
-| **Reportes por formato**  | `GET`    | `/api/report/by-format/{format}`       | Filtra reportes por formato (PDF, HTML, JSON)  |
-| **Eliminar reporte**      | `DELETE` | `/api/report/{id}`                     | Elimina reporte y archivos asociados           |
-
-### 📈 Endpoints de historial
-
-| 🎯 Acción                  | Método   | Endpoint                                | Descripción                                 |
-| -------------------------- | -------- | --------------------------------------- | ------------------------------------------- |
-| **Crear historial**        | `POST`   | `/api/history`                          | Registra nueva actividad en el historial    |
-| **Historial por usuario**  | `GET`    | `/api/history/by-user/{userId}`         | Obtiene historial completo del usuario      |
-| **Historial por análisis** | `GET`    | `/api/history/by-analysis/{analysisId}` | Obtiene historial de un análisis específico |
-| **Eliminar historial**     | `DELETE` | `/api/history/{id}`                     | Elimina entrada específica del historial    |
-
-### 📝 Ejemplos de uso completo
-
-**🚀 Crear nuevo reporte:**
-
-```bash
-curl -X POST "https://api.accessibility.local/api/report" \
-  -H "Content-Type: application/json" \
-  -H "Accept-Language: es" \
-  -d '{
-    "analysisId": 456,
-    "format": "PDF",
-    "filePath": "/reports/accessibility-report-456.pdf",
-    "generationDate": "2025-09-13T14:30:00Z",
-    "templateType": "comprehensive",
-    "includeCharts": true,
-    "includeRecommendations": true
-  }'
-```
-
-**📊 Respuesta de reporte creado:**
-
-```json
-{
-  "message": "Reporte creado correctamente.",
-  "success": true,
-  "data": {
-    "id": 789,
-    "analysisId": 456,
-    "format": "PDF",
-    "filePath": "/reports/accessibility-report-456.pdf",
-    "generationDate": "2025-09-13T14:30:00Z",
-    "status": "PENDING",
-    "fileSize": null,
-    "downloadUrl": null,
-    "expirationDate": "2025-10-13T14:30:00Z",
-    "createdAt": "2025-09-13T14:30:00Z",
-    "updatedAt": "2025-09-13T14:30:00Z"
-  }
-}
-```
-
-**✅ Reporte completado con detalles:**
-
-```bash
-curl "https://api.accessibility.local/api/report/789" \
-  -H "Accept-Language: es"
-```
-
-```json
-{
-  "message": "Reporte obtenido exitosamente.",
-  "success": true,
-  "data": {
-    "id": 789,
-    "analysisId": 456,
-    "format": "PDF",
-    "filePath": "/reports/accessibility-report-456.pdf",
-    "generationDate": "2025-09-13T14:30:00Z",
-    "status": "COMPLETED",
-    "fileSize": 2048576,
-    "downloadUrl": "https://api.accessibility.local/api/report/789/download",
-    "expirationDate": "2025-10-13T14:30:00Z",
-    "metadata": {
-      "pages": 24,
-      "violationsCount": 8,
-      "passesCount": 156,
-      "templateVersion": "2.1",
-      "generationTimeMs": 3420
-    },
-    "createdAt": "2025-09-13T14:30:00Z",
-    "updatedAt": "2025-09-13T14:32:25Z"
-  }
-}
-```
-
-**📈 Crear registro de historial:**
-
-```bash
-curl -X POST "https://api.accessibility.local/api/history" \
-  -H "Content-Type: application/json" \
-  -H "Accept-Language: es" \
-  -d '{
-    "userId": 42,
-    "analysisId": 456,
-    "historyType": "GENERATION",
-    "description": "Reporte PDF generado automáticamente",
-    "metadata": {
-      "reportId": 789,
-      "format": "PDF",
-      "ipAddress": "192.168.1.100",
-      "userAgent": "Mozilla/5.0..."
-    }
-  }'
-```
-
-**📊 Respuesta de historial creado:**
-
-```json
-{
-  "message": "Historial creado correctamente.",
-  "success": true,
-  "data": {
-    "id": 123,
-    "userId": 42,
-    "analysisId": 456,
-    "historyType": "GENERATION",
-    "description": "Reporte PDF generado automáticamente",
-    "metadata": {
-      "reportId": 789,
-      "format": "PDF",
-      "ipAddress": "192.168.1.100",
-      "userAgent": "Mozilla/5.0..."
-    },
-    "createdAt": "2025-09-13T14:32:30Z",
-    "updatedAt": "2025-09-13T14:32:30Z"
-  }
-}
-```
-
-### 🔍 Consultas avanzadas
-
-**Reportes por análisis específico:**
-
-```bash
-# Obtener todos los reportes de un análisis
-curl "https://api.accessibility.local/api/report/by-analysis/456" \
-  -H "Accept-Language: es"
-```
-
-**Reportes por formato:**
-
-```bash
-# Solo reportes PDF
-curl "https://api.accessibility.local/api/report/by-format/PDF" \
-  -H "Accept-Language: es"
-
-# Solo reportes HTML interactivos
-curl "https://api.accessibility.local/api/report/by-format/HTML" \
-  -H "Accept-Language: es"
-```
-
-**Historial completo por usuario:**
-
-```bash
-# Historial de actividades del usuario
-curl "https://api.accessibility.local/api/history/by-user/42?page=1&pageSize=20" \
-  -H "Accept-Language: es"
-```
-
-### 🚨 Manejo de errores y respuestas
-
-**Respuestas de error estandarizadas:**
-
-```json
-// Error 400: Parámetros inválidos
-{
-  "success": false,
-  "error": "Formato de reporte no válido. Formatos soportados: PDF, HTML, JSON",
-  "details": {
-    "field": "format",
-    "value": "XLSX",
-    "allowedValues": ["PDF", "HTML", "JSON"]
-  },
-  "timestamp": "2025-09-13T14:30:00Z",
-  "path": "/api/report"
-}
-
-// Error 404: Recurso no encontrado
-{
-  "success": false,
-  "error": "Reporte con ID 999 no encontrado",
-  "timestamp": "2025-09-13T14:30:00Z",
-  "path": "/api/report/999"
-}
-
-// Error 409: Conflicto de recursos
-{
-  "success": false,
-  "error": "Ya existe un reporte en formato PDF para el análisis 456",
-  "details": {
-    "conflictingResource": "Report",
-    "analysisId": 456,
-    "existingFormat": "PDF"
-  },
-  "timestamp": "2025-09-13T14:30:00Z",
-  "path": "/api/report"
-}
-```
-
-**🎯 Códigos de estado HTTP:**
-
-- `200 OK` → Operación exitosa
-- `201 Created` → Recurso creado correctamente
-- `204 No Content` → Eliminación exitosa
-- `400 Bad Request` → Parámetros inválidos o malformados
-- `404 Not Found` → Recurso no encontrado
-- `409 Conflict` → Conflicto de recursos existentes
-- `500 Internal Server Error` → Error interno del servidor
-
-## 🐳 Despliegue y containerización
-
-### 🐳 Configuración de Docker
-
-**📦 Docker Compose para desarrollo:**
-
-```yaml
-# docker-compose.dev.yml
 services:
   reports-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: magodeveloper/accessibility-ms-reports:dev
-    container_name: accessibility-reports-dev
+    image: accessibility-reports:latest
     ports:
-      - "5003:8083"
-      - "5103:8443" # HTTPS
+      - "5003:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8083;https://+:8443
-      - ConnectionStrings__Default=Server=reports-db;Port=3306;Database=reportsdb;Uid=reportsuser;Pwd=ReportsApp2025SecurePass;
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=dev-cert-password
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-    volumes:
-      - ~/.aspnet/https:/https:ro
-      - ./reports-storage:/app/reports
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__ReportsDb=Server=mysql-reports;Database=accessibility_reports;Uid=root;Pwd=password
+      - JwtSettings__SecretKey=your-secure-jwt-secret-key-min-64-chars
+      - JwtSettings__Issuer=https://api.accessibility.company.com/users
+      - JwtSettings__Audience=https://accessibility.company.com
+      - JwtSettings__ExpiryHours=24
+      - GatewaySecret=your-gateway-secret
+      - DefaultLanguage=es
     depends_on:
-      - reports-db
-    networks:
-      - accessibility-network
+      - mysql-reports
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
 
-  reports-db:
-    image: mysql:8.4
-    container_name: accessibility-reports-db-dev
+  mysql-reports:
+    image: mysql:8.0
     ports:
-      - "3309:3306"
+      - "3308:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiN
-      MYSQL_DATABASE: reportsdb
-      MYSQL_USER: reportsuser
-      MYSQL_PASSWORD: ReportsApp2025SecurePass
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=accessibility_reports
     volumes:
-      - reports-db-data:/var/lib/mysql
+      - mysql-reports-data:/var/lib/mysql
       - ./init-reports-db.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - accessibility-network
 
 volumes:
-  reports-db-data:
-  reports-storage:
-
-networks:
-  accessibility-network:
-    external: true
+  mysql-reports-data:
 ```
 
-**🚀 Comandos de despliegue:**
+## ⚙️ Configuración
+
+### Variables de Entorno
 
 ```bash
-# Construcción de imagen optimizada
-docker build -t accessibility-ms-reports:latest .
+# ASP.NET Core
+ASPNETCORE_ENVIRONMENT=Production|Development
+ASPNETCORE_URLS=http://+:8080
 
-# Desarrollo con recarga automática
-docker-compose -f docker-compose.dev.yml up --build
+# Base de Datos
+ConnectionStrings__ReportsDb=Server=localhost;Database=accessibility_reports;Uid=root;Pwd=password
 
-# Producción con optimizaciones
-docker-compose -f docker-compose.prod.yml up -d
+# JWT Configuration (REQUERIDO)
+JwtSettings__SecretKey=your-super-secret-key-min-64-chars-for-production
+JwtSettings__Issuer=https://api.accessibility.company.com/users
+JwtSettings__Audience=https://accessibility.company.com
+JwtSettings__ExpiryHours=24
 
-# Logs en tiempo real
-docker-compose logs -f reports-api
+# Gateway Secret (para comunicación entre servicios)
+GatewaySecret=your-super-secret-gateway-key
 
-# Limpieza completa
-docker-compose down -v && docker system prune -f
+# Localization
+DefaultLanguage=es
+SupportedLanguages=es,en
+
+# Logging
+Serilog__MinimumLevel=Information
+Serilog__WriteTo__Console=true
+
+# Report Generation
+Reports__MaxSizeInMB=50
+Reports__AllowedFormats=PDF,HTML,JSON,CSV
+Reports__StoragePath=/app/reports
+
+# Health Checks
+HealthChecks__TimeoutSeconds=30
 ```
 
-### ⚙️ Variables de entorno Docker
+### Configuración de Base de Datos
 
-**🔧 Configuración avanzada (.env):**
+```sql
+-- Crear base de datos
+CREATE DATABASE accessibility_reports CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Ejecutar script de inicialización
+SOURCE init-reports-db.sql;
+```
+
+### Configuración de JWT
+
+**⚠️ IMPORTANTE:** Todos los endpoints requieren autenticación JWT.
+
+#### Generar Secret Key Segura
+
+```powershell
+# Generar nueva secret key
+.\Generate-JwtSecretKey.ps1 -Type Special -Length 64
+
+# Validar configuración JWT
+.\Validate-JwtConfig.ps1
+```
+
+#### Configurar Secret Key
+
+**Desarrollo (User Secrets):**
 
 ```bash
-# === APLICACIÓN ===
-ASPNETCORE_ENVIRONMENT=Production
-ASPNETCORE_URLS=https://+:8443;http://+:8083
-
-# === ALMACENAMIENTO DE REPORTES ===
-REPORTS_STORAGE_PATH=/app/reports
-REPORTS_BASE_URL=https://reports.accessibility.local
-REPORTS_MAX_FILE_SIZE_MB=100
-REPORTS_CLEANUP_INTERVAL_HOURS=24
-
-# === GENERACIÓN DE REPORTES ===
-PDF_TEMPLATE_PATH=/app/templates/pdf
-HTML_TEMPLATE_PATH=/app/templates/html
-DEFAULT_FONT_FAMILY=Arial, sans-serif
-ENABLE_WATERMARK=true
-WATERMARK_TEXT=Generated by Accessibility Reports
-
-# === PERFORMANCE Y CACHING ===
-ENABLE_RESPONSE_CACHING=true
-CACHE_DURATION_MINUTES=30
-MAX_CONCURRENT_GENERATIONS=5
-REPORT_GENERATION_TIMEOUT_MS=60000
-
-# === INTEGRACIÓN CON OTROS MICROSERVICIOS ===
-ANALYSIS_SERVICE_TIMEOUT_MS=30000
-USERS_SERVICE_TIMEOUT_MS=15000
-ENABLE_SERVICE_DISCOVERY=true
+dotnet user-secrets set "JwtSettings:SecretKey" "your-generated-key"
 ```
 
-### ⚡ Performance y benchmarks esperados
-
-**🚀 Métricas de generación de reportes:**
-
-| Formato  | Tamaño promedio | Tiempo generación | Límite concurrente | Memoria pico |
-| -------- | --------------- | ----------------- | ------------------ | ------------ |
-| **PDF**  | 2-5 MB          | 2-4 segundos      | 5 simultáneos      | 150-300 MB   |
-| **HTML** | 500 KB - 1 MB   | 1-2 segundos      | 10 simultáneos     | 80-150 MB    |
-| **JSON** | 100-500 KB      | 0.5-1 segundo     | 15 simultáneos     | 50-100 MB    |
-
-**📈 Configuraciones de rendimiento recomendadas:**
+**Docker / Producción (.env):**
 
 ```bash
-# Para entornos de alta demanda
-MAX_CONCURRENT_GENERATIONS=10
-REPORT_GENERATION_TIMEOUT_MS=120000
-CACHE_DURATION_MINUTES=60
-
-# Para entornos con recursos limitados
-MAX_CONCURRENT_GENERATIONS=3
-REPORT_GENERATION_TIMEOUT_MS=45000
-CACHE_DURATION_MINUTES=15
+JwtSettings__SecretKey=your-generated-key-min-64-chars
 ```
 
-**🎯 Umbrales de monitoreo sugeridos:**
+#### Obtener Token JWT
 
-- **Tiempo de respuesta**: < 5 segundos para PDF, < 3 segundos para HTML/JSON
-- **Memoria máxima**: < 500 MB por proceso de generación
-- **CPU utilizada**: < 80% durante picos de generación
-- **Tasa de éxito**: > 95% de reportes generados exitosamente
-- **Storage cleanup**: Reportes > 30 días eliminados automáticamente
-
-### 📊 Monitoreo y métricas
-
-**🔍 Health checks implementados:**
-
-- `/health` → Estado general del servicio
-- `/health/ready` → Preparado para recibir tráfico
-- `/health/live` → Servicio funcionando correctamente
-- `/health/db` → Estado de conexión a base de datos
-
-**📈 Métricas personalizadas disponibles:**
-
-```csharp
-// Métricas de generación de reportes
-reports_generation_requests_total{format="PDF|HTML|JSON", status="success|error"}
-reports_generation_duration_seconds{format="PDF|HTML|JSON"}
-reports_active_generations_count
-reports_storage_size_bytes
-
-// Métricas de historial
-history_events_total{type="GENERATION|DOWNLOAD|DELETION|SHARING"}
-history_entries_count_by_user
-history_retention_policy_cleanups_total
-
-// Métricas de base de datos
-database_reports_total_count
-database_reports_by_status{status="PENDING|GENERATING|COMPLETED|FAILED|EXPIRED"}
-database_history_entries_total
-database_query_duration_seconds{operation="select|insert|update|delete"}
-
-// Métricas de sistema
-memory_usage_bytes
-storage_usage_bytes{type="reports|templates|cache"}
-http_requests_per_second{method="GET|POST|DELETE"}
-```
-
-### 🔗 Integración con ecosistema de microservicios
-
-**🌐 Comunicación con accessibility-ms-analysis:**
+Para usar la API, primero obtenga un token del microservicio de usuarios:
 
 ```bash
-# Obtener detalles de análisis para generar reporte
-GET http://accessibility-ms-analysis:5002/api/analysis/{analysisId}
+# Login y obtener token
+curl -X POST http://localhost:8081/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"Password123!"}'
 
-# Notificar que reporte ha sido generado
-POST http://accessibility-ms-analysis:5002/api/analysis/{analysisId}/report-generated
-{
-  "reportId": 789,
-  "format": "PDF",
-  "downloadUrl": "https://reports.accessibility.local/api/report/789/download"
-}
+# Usar token en requests
+curl -X GET http://localhost:8083/api/report \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-**👤 Comunicación con accessibility-ms-users:**
+**Nota:** La configuración JWT debe ser **idéntica** en todos los microservicios (Users, Reports, Analysis) y el Gateway.
 
-```bash
-# Validar usuario antes de crear historial
-GET http://accessibility-ms-users:5001/api/users/{userId}
+## 🛠️ Stack Tecnológico
 
-# Registrar actividad de reporte en perfil de usuario
-POST http://accessibility-ms-users:5001/api/users/{userId}/activity
-{
-  "activityType": "REPORT_GENERATED",
-  "reportId": 789,
-  "timestamp": "2025-09-13T14:32:30Z"
-}
-```
+- **Runtime:** .NET 9.0
+- **Framework:** ASP.NET Core Web API
+- **ORM:** Entity Framework Core 9.0
+- **Database:** MySQL 8.0+
+- **Authentication:** JWT Bearer
+- **Validation:** FluentValidation
+- **Logging:** Serilog
+- **Metrics:** Prometheus.NET
+- **Testing:** xUnit + Moq + FluentAssertions
+- **Coverage:** Coverlet + ReportGenerator
+- **Container:** Docker + Docker Compose
 
-## 🌐 Internacionalización y localización
+## � License
 
-### 🗺️ Idiomas soportados
-
-| Idioma        | Código  | Estado             | Cobertura |
-| ------------- | ------- | ------------------ | --------- |
-| **Español**   | `es-ES` | ✅ **Completo**    | 100%      |
-| **Inglés**    | `en-US` | ✅ **Completo**    | 100%      |
-| **Portugués** | `pt-BR` | 🔄 **Planificado** | 0%        |
-| **Francés**   | `fr-FR` | 🔄 **Planificado** | 0%        |
+**Proprietary Software License v1.0**
 
-### 🔧 Configuración de localización
+Copyright (c) 2025 Geovanny Camacho. All rights reserved.
 
-**Headers de idioma soportados:**
+**IMPORTANT:** This software and associated documentation files (the "Software") are the exclusive property of Geovanny Camacho and are protected by copyright laws and international treaty provisions.
 
-```bash
-# Español (por defecto)
-Accept-Language: es-ES
-Accept-Language: es
+### TERMS AND CONDITIONS
 
-# Inglés
-Accept-Language: en-US
-Accept-Language: en
+1. **OWNERSHIP**: The Software is licensed, not sold. Geovanny Camacho retains all right, title, and interest in and to the Software, including all intellectual property rights.
 
-# Múltiples idiomas con prioridad
-Accept-Language: en-US,en;q=0.9,es;q=0.8
-```
+2. **RESTRICTIONS**: You may NOT:
 
-**📝 Ejemplos de respuestas localizadas:**
+   - Copy, modify, or create derivative works of the Software
+   - Distribute, transfer, sublicense, lease, lend, or rent the Software
+   - Reverse engineer, decompile, or disassemble the Software
+   - Remove or alter any proprietary notices or labels on the Software
+   - Use the Software for any commercial purpose without explicit written permission
+   - Share access credentials or allow unauthorized access to the Software
 
-```json
-// Respuesta en español (es-ES)
-{
-  "message": "Reporte creado correctamente.",
-  "success": true,
-  "data": { /* ... */ }
-}
+3. **CONFIDENTIALITY**: The Software contains trade secrets and confidential information. You agree to maintain the confidentiality of the Software and not disclose it to any third party.
 
-// Respuesta en inglés (en-US)
-{
-  "message": "Report created successfully.",
-  "success": true,
-  "data": { /* ... */ }
-}
-```
+4. **TERMINATION**: This license is effective until terminated. Your rights under this license will terminate automatically without notice if you fail to comply with any of its terms.
 
-### 📋 Archivos de recursos
+5. **NO WARRANTY**: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
-```
-📁 src/Reports.Api/Resources/
-├── 🇪🇸 Messages.es.resx          # Mensajes en español
-├── 🇺🇸 Messages.en.resx          # Mensajes en inglés
-├── 🇪🇸 Validations.es.resx       # Validaciones en español
-└── 🇺🇸 Validations.en.resx       # Validaciones en inglés
-```
+6. **LIMITATION OF LIABILITY**: IN NO EVENT SHALL GEOVANNY CAMACHO BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-## 🚀 CI/CD y desarrollo
+7. **GOVERNING LAW**: This license shall be governed by and construed in accordance with the laws of the jurisdiction in which Geovanny Camacho resides, without regard to its conflict of law provisions.
 
-### 🔄 Pipeline automatizado
+8. **ENTIRE AGREEMENT**: This license constitutes the entire agreement between you and Geovanny Camacho regarding the Software and supersedes all prior or contemporaneous understandings.
 
-**GitHub Actions configurado para:**
+**FOR LICENSING INQUIRIES:**  
+Geovanny Camacho  
+Email: fgiocl@outlook.com
 
-✅ **Build y Tests automáticos**
-
-- Compilación en .NET 9 con multiple targeting
-- Ejecución de tests unitarios e integración
-- Reporte de cobertura de código con Coverlet
-- Análisis de calidad con SonarQube
-
-✅ **Generación de reportes de prueba**
-
-- Tests de generación PDF con bibliotecas reales
-- Validación de plantillas HTML responsivas
-- Pruebas de exportación JSON con esquemas
-- Tests de performance para generación masiva
-
-✅ **Despliegue automatizado**
-
-- Build de imagen Docker multi-stage optimizada
-- Push automático a Docker Hub y Azure Container Registry
-- Deploy automático a entorno staging
-- Deploy manual a producción con aprobaciones requeridas
-
-✅ **Validaciones de seguridad**
-
-- Escaneo de vulnerabilidades en dependencias NuGet
-- Análisis SAST del código fuente C#
-- Validación de configuraciones Docker y secretos
-
-### 🛠️ Herramientas de desarrollo recomendadas
-
-**IDEs y extensiones:**
-
-- **Visual Studio 2022** con extensiones:
-  - Entity Framework Core Power Tools
-  - SonarLint para C#
-  - Docker para Visual Studio
-  - REST Client para pruebas de API
-- **VS Code** con extensiones:
-  - C# Dev Kit
-  - REST Client
-  - Docker y Docker Compose
-  - GitLens para control de versiones
-
-**🧪 Testing y depuración:**
-
-```bash
-# Tests con coverage detallado y filtros
-dotnet test --collect:"XPlat Code Coverage" --filter Category!=Integration
-
-# Generar reporte HTML de coverage con umbrales
-reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:Html -assemblyfilters:+Reports.*
-
-# Tests de rendimiento específicos
-dotnet test --filter Category=Performance --logger "console;verbosity=detailed"
-
-# Depuración con logs estructurados
-dotnet run --environment Development --verbosity diagnostic --property:EnableStructuredLogging=true
-
-# 🎯 Tests específicos del dominio de reportes
-dotnet test --filter "Category=ReportGeneration&Format=PDF" --logger trx --results-directory TestResults/Reports
-
-# Tests de integración con servicios externos
-dotnet test --filter "Category=Integration&Service=Analysis" --logger "console;verbosity=detailed"
-
-# Tests de validación de formatos
-dotnet test --filter "FullyQualifiedName~ReportFormatValidation" --logger json --results-directory TestResults/Validation
-
-# Tests de performance por formato específico
-dotnet test --filter "TestCategory=Performance&Format=HTML" --logger "trx;LogFileName=html-performance.trx"
-
-# Tests de almacenamiento y cleanup
-dotnet test --filter "TestCategory=Storage" --environment TEST_STORAGE_PATH=/tmp/test-reports
-
-# Tests de historial y auditoría
-dotnet test --filter "FullyQualifiedName~HistoryService" --collect:"Code Coverage" --settings coverage.runsettings
-
-# Tests end-to-end de flujo completo
-dotnet test --filter "Category=E2E" --logger "console;verbosity=normal" --results-directory TestResults/E2E
-```
-
-## 🔒 Consideraciones de seguridad
-
-### 🛡️ Protecciones implementadas
-
-✅ **Autenticación y autorización:**
-
-- JWT tokens para autenticación de microservicios
-- API Keys para servicios internos
-- Rate limiting por endpoint y usuario
-- CORS configurado específicamente por entorno
-
-✅ **Validación y sanitización:**
-
-- Validación estricta de formatos de reporte
-- Sanitización de nombres de archivo y rutas
-- Protección contra path traversal en storage
-- Validación de tamaños de archivo y limits
-
-✅ **Protección de datos:**
-
-- Encriptación de URLs de descarga temporales
-- Logs sanitizados sin información PII
-- Almacenamiento seguro de reportes con TTL
-- Configuración HTTPS obligatoria en producción
-
-✅ **Auditoría y compliance:**
-
-- Registro completo de actividades en historial
-- Tracking de accesos y descargas de reportes
-- Retention policies configurable por tipo de dato
-- Logs de auditoría para compliance GDPR/CCPA
-
-### ⚠️ Recomendaciones de producción
-
-1. **🔐 Gestión de secretos**: Usar Azure Key Vault o equivalente para passwords y JWT secrets
-2. **🌐 Red segura**: VPN/VPC para comunicación inter-microservicios sin exposición pública
-3. **📊 Monitoreo activo**: Alertas automáticas para generaciones fallidas y accesos anómalos
-4. **🔄 Respaldo**: Backup automático de reportes críticos y base de datos cada 6 horas
-5. **📋 Auditoría**: Log estructurado de todas las operaciones con correlationId
-6. **⏱️ Límites**: Timeouts apropiados y circuit breakers para evitar degradación
-7. **🗑️ Limpieza**: Políticas de retention automático para reportes y logs antiguos
-
-## �️ Troubleshooting y resolución de problemas
-
-### 🚨 **Problemas comunes y soluciones**
-
-#### **❌ Error: "Report generation timeout"**
-
-```bash
-# Síntoma: Reportes PDF fallan con timeout
-Error: ReportGenerationException: Generation timeout after 60000ms
-
-# Solución 1: Aumentar timeout en configuración
-REPORT_GENERATION_TIMEOUT_MS=120000
-
-# Solución 2: Verificar memoria disponible
-docker stats accessibility-reports-api
-
-# Solución 3: Reducir concurrencia
-MAX_CONCURRENT_GENERATIONS=3
-```
-
-#### **🗄️ Error: "Database connection failed"**
-
-```bash
-# Síntoma: Cannot connect to MySQL
-SqlException: Unable to connect to any of the specified MySQL hosts
-
-# Solución 1: Verificar estado del contenedor de BD
-docker-compose ps reports-db
-
-# Solución 2: Verificar logs de MySQL
-docker-compose logs reports-db
-
-# Solución 3: Recrear base de datos
-docker-compose down -v
-docker-compose up -d reports-db
-```
-
-#### **🔒 Error: "Cross-microservice validation failed"**
-
-```bash
-# Síntoma: Analysis ID not found in external service
-ValidationException: Analysis 456 not found in accessibility-ms-analysis
-
-# Solución 1: Verificar conectividad entre servicios
-curl http://accessibility-ms-analysis:5002/health
-
-# Solución 2: Comprobar configuración de red Docker
-docker network ls
-docker network inspect accessibility-network
-
-# Solución 3: Verificar variables de entorno de servicios
-docker-compose config
-```
-
-#### **💾 Error: "Storage space exhausted"**
-
-```bash
-# Síntoma: Fallos en escritura de archivos de reporte
-IOException: No space left on device
-
-# Solución 1: Limpiar reportes antiguos manualmente
-find /app/reports -name "*.pdf" -mtime +30 -delete
-
-# Solución 2: Verificar y aumentar volumen Docker
-docker system df
-docker volume prune
-
-# Solución 3: Configurar limpieza automática
-REPORTS_CLEANUP_INTERVAL_HOURS=12
-REPORTS_MAX_AGE_DAYS=15
-```
-
-### 🔍 **Comandos de diagnóstico útiles**
-
-```bash
-# 📊 Estado general del sistema
-curl http://localhost:5003/health
-curl http://localhost:5003/health/ready
-curl http://localhost:5003/health/db
-
-# 📈 Métricas de performance
-curl http://localhost:5003/metrics
-
-# 🔍 Logs estructurados con filtro
-docker-compose logs reports-api | grep -i "error\|exception\|timeout"
-
-# 📋 Verificar configuración activa
-curl http://localhost:5003/api/config/active
-
-# 🗄️ Prueba de conexión a base de datos
-docker exec -it accessibility-reports-db-dev mysql -u reportsuser -p -e "SHOW TABLES;"
-
-# 🌐 Test de conectividad entre microservicios
-docker exec -it accessibility-reports-dev curl http://accessibility-ms-analysis:5002/health
-docker exec -it accessibility-reports-dev curl http://accessibility-ms-users:5001/health
-```
-
-### 📋 **Checklist de resolución rápida**
-
-✅ **Verificaciones básicas:**
-
-- [ ] Contenedores en ejecución: `docker-compose ps`
-- [ ] Logs sin errores críticos: `docker-compose logs --tail=50`
-- [ ] Health checks respondan: `curl localhost:5003/health`
-- [ ] Base de datos accesible: Conexión MySQL exitosa
-
-✅ **Verificaciones de red:**
-
-- [ ] Red Docker activa: `docker network inspect accessibility-network`
-- [ ] Puertos expuestos correctamente: `netstat -tlnp | grep 5003`
-- [ ] Servicios externos respondiendo: Health checks de otros microservicios
-
-✅ **Verificaciones de performance:**
-
-- [ ] Memoria suficiente: `docker stats` < 80% uso
-- [ ] Espacio en disco: `df -h` > 2GB disponible
-- [ ] CPU no saturada: Load average < número de cores
-
-## �📚 Recursos adicionales
-
-### 🔗 Enlaces útiles
-
-- **[PDF Generation Best Practices](https://docs.microsoft.com/en-us/dotnet/core/extensions/pdf-generation)** → Guías para generación de PDF empresarial
-- **[Entity Framework Core Docs](https://docs.microsoft.com/en-us/ef/core/)** → Documentación completa de EF Core 9.0
-- **[ASP.NET Core Security](https://docs.microsoft.com/en-us/aspnet/core/security/)** → Mejores prácticas de seguridad
-- **[Docker Multi-stage Builds](https://docs.docker.com/develop/dev-best-practices/)** → Optimización de imágenes Docker
-- **[Localization in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/localization)** → Guía completa de i18n
-- **[Health Checks in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks)** → Implementación de health checks
-
-### 📖 Documentación técnica
-
-- `docs/report-templates.md` → Plantillas y formatos de reporte disponibles
-- `docs/api-specification.yaml` → Especificación completa OpenAPI 3.0
-- `docs/deployment-guide.md` → Guía detallada de despliegue empresarial
-- `docs/troubleshooting.md` → Resolución de problemas comunes
-- `docs/performance-tuning.md` → Optimizaciones de rendimiento
-- `docs/localization-guide.md` → Guía para añadir nuevos idiomas
-- `docs/database-migrations.md` → Gestión de migraciones y versionado
+**By using this Software, you acknowledge that you have read this license, understand it, and agree to be bound by its terms and conditions.**
 
 ---
 
-## 🤝 Contribución y soporte
-
-### 👥 Equipo de desarrollo
-
-- **Tech Lead**: Arquitectura y diseño de microservicios
-- **Backend Developer**: Implementación de lógica de negocio y APIs
-- **UI/UX Designer**: Diseño de plantillas de reportes y experiencia de usuario
-- **DevOps Engineer**: CI/CD, containerización y despliegue
-- **QA Engineer**: Testing automatizado y aseguramiento de calidad
-
-### 🐛 Reportar issues
-
-1. **Issues en GitHub**: Usar **[GitHub Issues](../../issues)** para bugs y feature requests
-2. **Información requerida**:
-   - Versión del microservicio y entorno
-   - Logs relevantes con correlationId
-   - Pasos detallados para reproducir
-   - Ejemplos de payloads que causan problemas
-3. **Labels**: Usar etiquetas apropiadas (bug, enhancement, documentation, etc.)
-4. **Prioridad**: Indicar severidad (critical, high, medium, low)
-
-### ✨ Contribuir al proyecto
-
-1. **Fork** del repositorio en GitHub
-2. **Branch** para nueva funcionalidad: `git checkout -b feature/nueva-funcionalidad`
-3. **Desarrollo** siguiendo estándares de código y documentación
-4. **Tests** obligatorios para nueva funcionalidad con cobertura >85%
-5. **Pull Request** con:
-   - Descripción detallada de cambios
-   - Tests que validan la funcionalidad
-   - Documentación actualizada
-   - Screenshots o ejemplos si aplica
-
-### 📋 Estándares de código
-
-- **C# Coding Standards**: Seguir convenciones de Microsoft y StyleCop
-- **API Design**: RESTful siguiendo estándares OpenAPI 3.0
-- **Testing**: Tests unitarios y de integración obligatorios
-- **Documentation**: README actualizado y documentación inline
-- **Commit Messages**: Seguir [Conventional Commits](https://conventionalcommits.org/)
-- **Versioning**: Semantic Versioning (SemVer) estricto
-
----
-
-> 💡 **¿Necesitas ayuda?** Consulta nuestra documentación técnica completa, revisa los issues existentes, o abre un nuevo issue con detalles específicos. El microservicio está diseñado para ser escalable y mantenible siguiendo arquitectura de microservicios empresarial.
-
-**🎯 Versión:** 1.0.0 | **📅 Última actualización:** Septiembre 2025 | **⚡ Estado:** Producción listo
+**Author:** Geovanny Camacho (fgiocl@outlook.com)  
+**Last Update:** 09/10/2025

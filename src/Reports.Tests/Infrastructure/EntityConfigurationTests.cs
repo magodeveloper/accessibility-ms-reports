@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
-using Reports.Infrastructure.Data;
 using Reports.Domain.Entities;
+using Reports.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Reports.Tests.Infrastructure;
 

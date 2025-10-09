@@ -1,19 +1,25 @@
-using Microsoft.AspNetCore.Mvc;
-using Reports.Application.Dtos;
-using Reports.Application.Services.Report;
 using Reports.Api.Helpers;
+using Reports.Api.Metrics;
+using Reports.Application.Dtos;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Reports.Application.Services.Report;
+using Reports.Application.Services.UserContext;
 
 namespace Reports.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-
 public class ReportController : ControllerBase
 {
     private readonly IReportService _service;
-    public ReportController(IReportService service)
+    private readonly IUserContext _userContext;
+
+    public ReportController(IReportService service, IUserContext userContext)
     {
         _service = service;
+        _userContext = userContext;
     }
 
     /// <summary>
@@ -26,11 +32,24 @@ public class ReportController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetAll()
     {
-        var reports = await _service.GetAllAsync();
-        var lang = LanguageHelper.GetRequestLanguage(Request);
-        if (reports == null || !reports.Any())
-            return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
-        return Ok(new { message = Reports.Application.Localization.Get("Success_ReportList", lang), data = reports });
+        using (ReportsMetrics.MeasureQuery("get_all"))
+        {
+            // Validar autenticación
+            if (!_userContext.IsAuthenticated)
+            {
+                return Unauthorized(new { message = "Authentication required" });
+            }
+
+            var reports = await _service.GetAllAsync();
+            ReportsMetrics.RecordQuery("get_all");
+
+            var lang = LanguageHelper.GetRequestLanguage(Request);
+            if (reports == null || !reports.Any())
+            {
+                return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+            }
+            return Ok(new { message = Reports.Application.Localization.Get("Success_ReportList", lang), data = reports });
+        }
     }
 
     /// <summary>
@@ -44,13 +63,18 @@ public class ReportController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetByAnalysisId(int analysisId)
     {
-        var reports = await _service.GetByAnalysisIdAsync(analysisId);
-        if (reports == null || !reports.Any())
+        using (ReportsMetrics.MeasureQuery("get_by_analysis"))
         {
-            var lang = LanguageHelper.GetRequestLanguage(Request);
-            return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+            var reports = await _service.GetByAnalysisIdAsync(analysisId);
+            ReportsMetrics.RecordQuery("get_by_analysis");
+
+            if (reports == null || !reports.Any())
+            {
+                var lang = LanguageHelper.GetRequestLanguage(Request);
+                return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+            }
+            return Ok(reports);
         }
-        return Ok(reports);
     }
 
     /// <summary>
@@ -64,13 +88,18 @@ public class ReportController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetByGenerationDate(DateTime date)
     {
-        var reports = await _service.GetByGenerationDateAsync(date);
-        if (reports == null || !reports.Any())
+        using (ReportsMetrics.MeasureQuery("get_by_date"))
         {
-            var lang = LanguageHelper.GetRequestLanguage(Request);
-            return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+            var reports = await _service.GetByGenerationDateAsync(date);
+            ReportsMetrics.RecordQuery("get_by_date");
+
+            if (reports == null || !reports.Any())
+            {
+                var lang = LanguageHelper.GetRequestLanguage(Request);
+                return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+            }
+            return Ok(reports);
         }
-        return Ok(reports);
     }
 
     /// <summary>
@@ -84,13 +113,18 @@ public class ReportController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetByFormat(string format)
     {
-        var reports = await _service.GetByFormatAsync(format);
-        if (reports == null || !reports.Any())
+        using (ReportsMetrics.MeasureQuery("get_by_format"))
         {
-            var lang = LanguageHelper.GetRequestLanguage(Request);
-            return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+            var reports = await _service.GetByFormatAsync(format);
+            ReportsMetrics.RecordQuery("get_by_format");
+
+            if (reports == null || !reports.Any())
+            {
+                var lang = LanguageHelper.GetRequestLanguage(Request);
+                return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
+            }
+            return Ok(reports);
         }
-        return Ok(reports);
     }
 
     /// <summary>
@@ -104,9 +138,28 @@ public class ReportController : ControllerBase
     [ProducesResponseType(400)]
     public async Task<IActionResult> Create([FromBody] ReportDto dto)
     {
-        var created = await _service.CreateAsync(dto);
-        var lang = LanguageHelper.GetRequestLanguage(Request);
-        return Ok(new { message = Reports.Application.Localization.Get("Success_ReportCreated", lang), data = created });
+        // Validar autenticación
+        if (!_userContext.IsAuthenticated)
+        {
+            return Unauthorized(new { message = "Authentication required" });
+        }
+
+        using (ReportsMetrics.MeasureReportGeneration(dto.Format.ToString()))
+        {
+            try
+            {
+                var created = await _service.CreateAsync(dto);
+                ReportsMetrics.RecordReportGenerated(dto.Format.ToString(), success: true);
+
+                var lang = LanguageHelper.GetRequestLanguage(Request);
+                return Ok(new { message = Reports.Application.Localization.Get("Success_ReportCreated", lang), data = created });
+            }
+            catch
+            {
+                ReportsMetrics.RecordReportGenerated(dto.Format.ToString(), success: false);
+                throw;
+            }
+        }
     }
 
     /// <summary>
@@ -121,9 +174,17 @@ public class ReportController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _service.DeleteAsync(id);
+        if (deleted)
+        {
+            ReportsMetrics.ReportsDeletionsTotal.Inc();
+        }
+
         var lang = LanguageHelper.GetRequestLanguage(Request);
         if (deleted)
+        {
             return Ok(new { message = Reports.Application.Localization.Get("Success_ReportDeleted", lang) });
+        }
+
         return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
     }
 
@@ -138,9 +199,17 @@ public class ReportController : ControllerBase
     public async Task<IActionResult> DeleteAll()
     {
         var deleted = await _service.DeleteAllAsync();
+        if (deleted)
+        {
+            ReportsMetrics.ReportsDeletionsTotal.Inc();
+        }
+
         var lang = LanguageHelper.GetRequestLanguage(Request);
         if (deleted)
+        {
             return Ok(new { message = Reports.Application.Localization.Get("Success_AllReportsDeleted", lang) });
+        }
+
         return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
     }
 }

@@ -8,12 +8,23 @@ services:
       MYSQL_USER: ${DB_USER:-msuser}
       MYSQL_PASSWORD: ${DB_PASSWORD:-RptApp2025SecurePass}
     ports:
-      - '${DB_PORT:-3309}:3306'
+      - "${DB_PORT:-3309}:3306"
     volumes:
       - msreports_mysql:/var/lib/mysql
       - ./init-reports-db.sql:/docker-entrypoint-initdb.d/01-init-reports.sql:ro
+    networks:
+      - default
+      - accessibility-shared
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-p${DB_ROOT_PASSWORD:-cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiN}']
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-p${DB_ROOT_PASSWORD:-cH9QM3YwWOJJZaZ3ZyYloMqU6dcDCWiN}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -29,12 +40,32 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
-      ConnectionStrings__Default: 'server=mysql;port=3306;database=${DB_NAME:-reportsdb};user=${DB_USER:-msuser};password=${DB_PASSWORD:-RptApp2025SecurePass};TreatTinyAsBoolean=false'
+      ConnectionStrings__Default: "server=mysql;port=3306;database=${DB_NAME:-reportsdb};user=${DB_USER:-msuser};password=${DB_PASSWORD:-RptApp2025SecurePass};TreatTinyAsBoolean=false"
+      JwtSettings__SecretKey: ${JwtSettings__SecretKey}
+      JwtSettings__Issuer: ${JwtSettings__Issuer:-AccessibilityReportsAPI}
+      JwtSettings__Audience: ${JwtSettings__Audience:-AccessibilityClients}
+      JwtSettings__ExpiryHours: ${JwtSettings__ExpiryHours:-24}
     ports:
-      - '${API_HOST_PORT:-8083}:8083'
+      - "${API_HOST_PORT:-8083}:8083"
+    networks:
+      - default
+      - accessibility-shared
+    labels:
+      - "prometheus.scrape=true"
+      - "prometheus.port=8083"
+      - "prometheus.path=/metrics"
+      - "service.name=reports-api"
+      - "service.version=1.0"
 
 volumes:
   msreports_mysql:
+
+networks:
+  default:
+    name: accessibility-ms-reports_default
+  accessibility-shared:
+    external: true
+    name: accessibility-shared
 # Para usar un archivo de entorno específico:
 #   docker compose --env-file .env.development up
 #   docker compose --env-file .env.production up

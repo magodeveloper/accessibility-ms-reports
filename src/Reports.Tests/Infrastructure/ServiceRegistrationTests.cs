@@ -1,10 +1,10 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using FluentAssertions;
 using Reports.Infrastructure;
 using Reports.Infrastructure.Data;
-using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Reports.Tests.Infrastructure;
 

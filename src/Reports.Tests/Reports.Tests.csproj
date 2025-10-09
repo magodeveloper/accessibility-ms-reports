@@ -7,7 +7,7 @@
     <CollectCoverage>true</CollectCoverage>
     <CoverletOutputFormat>opencover</CoverletOutputFormat>
     <CoverletOutput>../TestResults/coverage.opencover.xml</CoverletOutput>
-    <Exclude>[*]Reports.Infrastructure.Migrations.*,[*]*Program,[*]*Startup</Exclude>
+    <Exclude>[*]Reports.Infrastructure.Migrations.*</Exclude>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="coverlet.collector" />
@@ -18,6 +18,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>

@@ -13,18 +13,23 @@ public class HistoryService : IHistoryService
     public async Task<IEnumerable<HistoryDto>> GetAllAsync()
     {
         return await _db.History
+            .AsNoTracking()  // Read-only optimization
             .Select(h => ToDto(h)).ToListAsync();
     }
 
     public async Task<IEnumerable<HistoryDto>> GetByUserIdAsync(int userId)
     {
-        return await _db.History.Where(h => h.UserId == userId)
+        return await _db.History
+            .AsNoTracking()  // Read-only optimization
+            .Where(h => h.UserId == userId)
             .Select(h => ToDto(h)).ToListAsync();
     }
 
     public async Task<IEnumerable<HistoryDto>> GetByAnalysisIdAsync(int analysisId)
     {
-        return await _db.History.Where(h => h.AnalysisId == analysisId)
+        return await _db.History
+            .AsNoTracking()  // Read-only optimization
+            .Where(h => h.AnalysisId == analysisId)
             .Select(h => ToDto(h)).ToListAsync();
     }
 
@@ -46,7 +51,11 @@ public class HistoryService : IHistoryService
     public async Task<bool> DeleteAsync(int id)
     {
         var entity = await _db.History.FindAsync(id);
-        if (entity == null) return false;
+        if (entity == null)
+        {
+            return false;
+        }
+
         _db.History.Remove(entity);
         await _db.SaveChangesAsync();
         return true;
@@ -55,7 +64,11 @@ public class HistoryService : IHistoryService
     public async Task<bool> DeleteAllAsync()
     {
         var entities = await _db.History.ToListAsync();
-        if (!entities.Any()) return false;
+        if (!entities.Any())
+        {
+            return false;
+        }
+
         _db.History.RemoveRange(entities);
         await _db.SaveChangesAsync();
         return true;

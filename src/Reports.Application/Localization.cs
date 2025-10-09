@@ -18,10 +18,17 @@ public static class Localization
             if (!_cache.TryGetValue(lang, out var foundDict))
             {
                 var file = Path.Combine(ResourcePath, $"messages.{lang}.json");
-                if (!File.Exists(file)) file = Path.Combine(ResourcePath, "messages.en.json");
+                if (!File.Exists(file))
+                {
+                    file = Path.Combine(ResourcePath, "messages.en.json");
+                }
+
                 foundDict = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
                 if (foundDict is null)
+                {
                     foundDict = new Dictionary<string, string>();
+                }
+
                 _cache[lang] = foundDict;
             }
             dict = foundDict;

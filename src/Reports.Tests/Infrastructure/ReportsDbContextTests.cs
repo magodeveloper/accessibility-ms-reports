@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using Reports.Infrastructure.Data;
-using Reports.Domain.Entities;
 using FluentAssertions;
+using Reports.Domain.Entities;
+using Reports.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Reports.Tests.Infrastructure;
 
@@ -12,7 +12,8 @@ namespace Reports.Tests.Infrastructure;
 /// </summary>
 public class ReportsDbContextConsolidatedTests : IDisposable
 {
-    private readonly ReportsDbContext _context;
+    private ReportsDbContext? _context;
+    private bool _disposed;
 
     public ReportsDbContextConsolidatedTests()
     {
@@ -305,7 +306,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
 
         // Assert
         recentReports.Should().HaveCount(2);
-        recentReports.First().Format.Should().Be(ReportFormat.Json);
+        recentReports[0].Format.Should().Be(ReportFormat.Json);
     }
 
     #endregion
@@ -345,7 +346,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
             .ToList();
 
         reportsWithHistory.Should().HaveCount(1);
-        reportsWithHistory.First().AnalysisId.Should().Be(1);
+        reportsWithHistory[0].AnalysisId.Should().Be(1);
     }
 
     #endregion
@@ -369,7 +370,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
         // Act & Assert
         _context.Reports.Add(report);
         var action = () => _context.SaveChanges();
-        
+
         // Note: InMemory provider is more lenient than real database
         // This test mainly verifies the context can handle edge cases
         action.Should().NotThrow();
@@ -451,9 +452,23 @@ public class ReportsDbContextConsolidatedTests : IDisposable
     }
 
     #endregion
-
     public void Dispose()
     {
-        _context?.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+                _context = null;
+            }
+            _disposed = true;
+        }
+    }
+}   }
 }

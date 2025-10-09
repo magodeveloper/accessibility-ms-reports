@@ -1,6 +1,6 @@
+using FluentAssertions;
 using Reports.Application.Dtos;
 using Reports.Domain.Entities;
-using FluentAssertions;
 
 namespace Reports.Tests.Dtos;
 

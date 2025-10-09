@@ -258,6 +258,49 @@
             box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
         }
 
+        /* Test Stats Flexbox */
+        .test-stats-flex {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .stat-number-success {
+            color: #2ecc71;
+            font-size: 1.4em;
+        }
+
+        .stat-number-danger {
+            color: #e74c3c;
+            font-size: 1.4em;
+        }
+
+        .stat-number-warning {
+            color: #f39c12;
+            font-size: 1.4em;
+        }
+
+        /* List Styles */
+        .tech-list {
+            line-height: 1.8;
+        }
+
+        .arch-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        /* Assembly Excluded */
+        .assembly-excluded {
+            background: #e8f5e8;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .coverage-excluded {
+            background: #95a5a6;
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) and (min-width: 769px) {
             .stats-grid,
@@ -293,38 +336,38 @@
         <div class="header">
             <h1>🛡️ Reports Microservice</h1>
             <p class="subtitle">Dashboard de Cobertura de Tests - Clean Architecture</p>
-            <div class="status-badge ">✅ 299/299 TESTS PASANDO</div>
-            <div class="timestamp">Última actualización: 13 de septiembre 2025, 21:19</div>
+            <div class="status-badge ">✅ 444/444 TESTS PASANDO</div>
+            <div class="timestamp">Última actualización: 05 de octubre 2025, 18:01</div>
         </div>
 
         <!-- Main Stats -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>📊 Cobertura Total</h3>
-                <div class="big-number ">91.01%</div>
+                <div class="big-number ">94.12%</div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 91.01%">
+                    <div class="progress-fill" data-width="94.12%">
                         <div class="progress-text">Excelente</div>
                     </div>
                 </div>
-                <p><strong>314 de 345</strong> líneas cubiertas</p>
-                <p><strong>0 de 0</strong> ramas cubiertas (75%)</p>
+                <p><strong>769 de 817</strong> líneas cubiertas</p>
+                <p><strong>0 de 0</strong> ramas cubiertas (81.87%)</p>
             </div>
 
             <div class="stat-card">
                 <h3>🧪 Tests Ejecutados</h3>
-                <div class="big-number">299</div>
-                <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                <div class="big-number">444</div>
+                <div class="test-stats-flex">
                     <div>
-                        <strong style="color: #2ecc71; font-size: 1.4em;">287</strong><br>
+                        <strong class="stat-number-success">432</strong><br>
                         <small>✅ Exitosos</small>
                     </div>
                     <div>
-                        <strong style="color: #2ecc71; font-size: 1.4em;">0</strong><br>
+                        <strong class="stat-number-success">0</strong><br>
                         <small>❌ Fallidos</small>
                     </div>
                     <div>
-                        <strong style="color: #2ecc71; font-size: 1.4em;">96%</strong><br>
+                        <strong class="stat-number-success">97.3%</strong><br>
                         <small>🎯 Tasa de éxito</small>
                     </div>
                 </div>
@@ -332,13 +375,13 @@
 
             <div class="stat-card">
                 <h3>⚡ Performance</h3>
-                <div class="big-number">12.2s</div>
+                <div class="big-number">12.6s</div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 70%">
+                    <div class="progress-fill" data-width="70%">
                         <div class="progress-text">Bueno</div>
                     </div>
                 </div>
-                <p>Tiempo de ejecución para <strong>299</strong> tests</p>
+                <p>Tiempo de ejecución para <strong>444</strong> tests</p>
             </div>
         </div>
 
@@ -349,14 +392,14 @@
                                 <div class="assembly-row">
                     <div class="assembly-name">Reports.Api</div>
                     <div class="assembly-coverage">
-                        <div class="coverage-badge coverage-good">87.42%</div>
-                        <small>153/175 líneas</small>
+                        <div class="coverage-badge coverage-excellent">93.96%</div>
+                        <small>592/630 líneas</small>
                     </div>
                 </div>                <div class="assembly-row">
                     <div class="assembly-name">Reports.Application</div>
                     <div class="assembly-coverage">
-                        <div class="coverage-badge coverage-excellent">94.3%</div>
-                        <small>149/158 líneas</small>
+                        <div class="coverage-badge coverage-excellent">94.28%</div>
+                        <small>165/175 líneas</small>
                     </div>
                 </div>                <div class="assembly-row">
                     <div class="assembly-name">Reports.Domain</div>
@@ -365,10 +408,10 @@
                         <small>12/12 líneas</small>
                     </div>
                 </div>
-                <div class="assembly-row" style="background: #e8f5e8; padding: 8px; border-radius: 8px;">
+                <div class="assembly-row assembly-excluded">
                     <div class="assembly-name">✅ Reports.Infrastructure</div>
                     <div class="assembly-coverage">
-                        <div class="coverage-badge" style="background: #95a5a6;">0% (excluido)</div>
+                        <div class="coverage-badge coverage-excluded">0% (excluido)</div>
                         <small>Omitido del cálculo</small>
                     </div>
                 </div>
@@ -376,7 +419,7 @@
             
             <div class="detail-card">
                 <h3>⚙️ Configuración Técnica</h3>
-                <ul style="line-height: 1.8;">
+                <ul class="tech-list">
                     <li><strong>Framework:</strong> .NET 9</li>
                     <li><strong>Test Framework:</strong> xUnit</li>
                     <li><strong>Mocking:</strong> Moq</li>
@@ -391,7 +434,7 @@
                 <h3>📁 Arquitectura</h3>
                 <div class="big-number">.NET 9</div>
                 <p>Sistema construido con:</p>
-                <ul style="margin-top: 10px; padding-left: 20px;">
+                <ul class="arch-list">
                     <li>Entity Framework Core + MySQL</li>
                     <li>xUnit + FluentAssertions</li>
                     <li>Clean Architecture</li>
@@ -409,11 +452,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             const progressBars = document.querySelectorAll('.progress-fill');
             progressBars.forEach(bar => {
-                const width = bar.style.width;
-                bar.style.width = '0%';
-                setTimeout(() => {
-                    bar.style.width = width;
-                }, 500);
+                const targetWidth = bar.getAttribute('data-width');
+                if (targetWidth) {
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = targetWidth;
+                    }, 500);
+                }
             });
         });
 

@@ -1,6 +1,6 @@
-using Reports.Infrastructure.Data;
 using Reports.Domain.Entities;
 using Reports.Application.Dtos;
+using Reports.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Reports.Application.Services.Report;
@@ -13,6 +13,7 @@ public class ReportService : IReportService
     public async Task<IEnumerable<ReportDto>> GetAllAsync()
     {
         return await _db.Reports
+            .AsNoTracking()  // Read-only optimization
             .Select(r => ToDto(r))
             .ToListAsync();
     }
@@ -20,6 +21,7 @@ public class ReportService : IReportService
     public async Task<IEnumerable<ReportDto>> GetByAnalysisIdAsync(int analysisId)
     {
         return await _db.Reports
+            .AsNoTracking()  // Read-only optimization
             .Where(r => r.AnalysisId == analysisId)
             .Select(r => ToDto(r))
             .ToListAsync();
@@ -27,6 +29,7 @@ public class ReportService : IReportService
 
     public async Task<IEnumerable<ReportDto>> GetByGenerationDateAsync(DateTime date)
         => await _db.Reports
+            .AsNoTracking()  // Read-only optimization
             .Where(r => r.GenerationDate.Year == date.Year &&
                         r.GenerationDate.Month == date.Month &&
                         r.GenerationDate.Day == date.Day)
@@ -38,6 +41,7 @@ public class ReportService : IReportService
         if (Enum.TryParse<ReportFormat>(format, true, out var enumFormat))
         {
             return await _db.Reports
+                .AsNoTracking()  // Read-only optimization
                 .Where(r => r.Format == enumFormat)
                 .Select(r => ToDto(r)).ToListAsync();
         }
@@ -56,6 +60,7 @@ public class ReportService : IReportService
         if (jsonEnumFormat.HasValue)
         {
             return await _db.Reports
+                .AsNoTracking()  // Read-only optimization
                 .Where(r => r.Format == jsonEnumFormat.Value)
                 .Select(r => ToDto(r)).ToListAsync();
         }
@@ -83,7 +88,11 @@ public class ReportService : IReportService
     public async Task<bool> DeleteAsync(int id)
     {
         var entity = await _db.Reports.FindAsync(id);
-        if (entity == null) return false;
+        if (entity == null)
+        {
+            return false;
+        }
+
         _db.Reports.Remove(entity);
         await _db.SaveChangesAsync();
         return true;
@@ -92,7 +101,11 @@ public class ReportService : IReportService
     public async Task<bool> DeleteAllAsync()
     {
         var entities = await _db.Reports.ToListAsync();
-        if (!entities.Any()) return false;
+        if (!entities.Any())
+        {
+            return false;
+        }
+
         _db.Reports.RemoveRange(entities);
         await _db.SaveChangesAsync();
         return true;
