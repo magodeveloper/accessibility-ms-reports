@@ -1,7 +1,7 @@
 # 📊 Accessibility Reports Service
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
-[![Tests](https://img.shields.io/badge/tests-432%2F444-brightgreen)](test-dashboard.html)
+[![Tests](https://img.shields.io/badge/tests-445%2F458-brightgreen)](test-dashboard.html)
 [![Coverage](https://img.shields.io/badge/coverage-94.12%25-brightgreen)](coverage-report/index.html)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
