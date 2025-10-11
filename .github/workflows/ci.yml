@@ -69,6 +69,7 @@ jobs:
       - name: Build Docker image
         run: |
           IMAGE=ms-reports-ci:${{ github.sha }}
+          docker rm -f ms-reports-smoke || true
           docker build -t $IMAGE .
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
       - name: Run container
@@ -85,7 +86,15 @@ jobs:
               echo "Health is OK"; exit 0; fi;
             echo "Waiting for service... ($i/30)"; sleep 2;
           done
-          echo "Service didn't become healthy in time"; docker logs ms-reports-smoke || true; exit 1
+          if ! curl -fsS http://localhost:8083/health >/dev/null; then
+            echo "Service didn't become healthy in time"; docker logs ms-reports-smoke > smoke.log || true; exit 1;
+          fi
+      - name: Upload smoke logs if failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ms-reports-smoke-logs
+          path: smoke.log
       - name: Stop container
         if: always()
         run: docker stop ms-reports-smoke || true
