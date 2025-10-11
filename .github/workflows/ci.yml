@@ -64,6 +64,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-test
     timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass
+          MYSQL_DATABASE: reportsdb
+          MYSQL_USER: devuser
+          MYSQL_PASSWORD: devpass
+        ports:
+          - 3308:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -prootpass" --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker image
@@ -72,11 +84,20 @@ jobs:
           docker rm -f ms-reports-smoke || true
           docker build -t $IMAGE .
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -P3308 -uroot -prootpass --silent; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+        shell: bash
       - name: Run container
         run: |
           docker run -d --rm --name ms-reports-smoke \
             -p 8083:8083 \
             -e ASPNETCORE_ENVIRONMENT=Production \
+            -e ConnectionStrings__Default="server=172.17.0.1;port=3308;database=reportsdb;user=devuser;password=devpass;TreatTinyAsBoolean=false" \
             "$IMAGE"
       - name: Wait for health
         shell: bash
@@ -87,7 +108,10 @@ jobs:
             echo "Waiting for service... ($i/30)"; sleep 2;
           done
           if ! curl -fsS http://localhost:8083/health >/dev/null; then
-            echo "Service didn't become healthy in time"; docker logs ms-reports-smoke > smoke.log || true; exit 1;
+            echo "Service didn't become healthy in time";
+            echo "Container logs:";
+            docker logs ms-reports-smoke 2>&1 | tee smoke.log || true;
+            exit 1;
           fi
       - name: Upload smoke logs if failed
         if: failure()
