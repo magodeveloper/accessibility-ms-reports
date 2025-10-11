@@ -93,7 +93,8 @@ var secretKey = jwtSettings["SecretKey"];
 var issuer = jwtSettings["Issuer"];
 var audience = jwtSettings["Audience"];
 
-if (string.IsNullOrEmpty(secretKey))
+// Validar SecretKey solo en entornos de producción (omitir en TestEnvironment)
+if (builder.Environment.EnvironmentName != "TestEnvironment" && string.IsNullOrEmpty(secretKey))
 {
     throw new InvalidOperationException("JwtSettings:SecretKey is required");
 }
@@ -109,7 +110,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = issuer,
             ValidAudience = audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey ?? "test-key-for-testing-environment-only")),
             ClockSkew = TimeSpan.Zero
         };
     });

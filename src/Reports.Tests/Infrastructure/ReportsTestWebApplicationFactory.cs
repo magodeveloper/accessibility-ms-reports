@@ -18,19 +18,24 @@ namespace Reports.Tests.Infrastructure
         {
             builder.UseEnvironment("TestEnvironment");
 
+            // Configurar SecretKey ANTES de que Program.cs intente leerlo
+            builder.UseSetting("JwtSettings:SecretKey", "9b3e7ER@S^glvxPWKX8nN?DTqtrd%Yj!oVIfh+BG&piHwZz6ky4Q52MumOFA-Lc0");
+            builder.UseSetting("JwtSettings:Issuer", "https://api.accessibility.company.com/reports");
+            builder.UseSetting("JwtSettings:Audience", "https://accessibility.company.com");
+            builder.UseSetting("JwtSettings:ExpiryHours", "24");
+            builder.UseSetting("Gateway:Secret", "");
+
             builder.ConfigureAppConfiguration((context, config) =>
             {
-                // Limpiar configuraciones existentes para evitar conflictos con appsettings.json
-                config.Sources.Clear();
-
-                // Agregar configuración en memoria específica para tests
+                // NO limpiar Sources - solo agregar configuración que sobrescribe valores
+                // Agregar configuración en memoria específica para tests (tiene prioridad)
                 config.AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["ASPNETCORE_ENVIRONMENT"] = "TestEnvironment",
                     ["Environment"] = "TestEnvironment",
                     ["Gateway:Secret"] = "",  // Deshabilitar validación de Gateway Secret (vacío)
                     ["JwtSettings:SecretKey"] = "9b3e7ER@S^glvxPWKX8nN?DTqtrd%Yj!oVIfh+BG&piHwZz6ky4Q52MumOFA-Lc0",
-                    ["JwtSettings:Issuer"] = "https://api.accessibility.company.com/users",
+                    ["JwtSettings:Issuer"] = "https://api.accessibility.company.com/reports",
                     ["JwtSettings:Audience"] = "https://accessibility.company.com",
                     ["JwtSettings:ExpiryHours"] = "24",
                     ["HealthChecks:MemoryThresholdMB"] = "512",
