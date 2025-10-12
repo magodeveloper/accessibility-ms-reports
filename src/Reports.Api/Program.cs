@@ -93,8 +93,7 @@ var secretKey = jwtSettings["SecretKey"];
 var issuer = jwtSettings["Issuer"];
 var audience = jwtSettings["Audience"];
 
-// Validar SecretKey solo en entornos de producción (omitir en TestEnvironment)
-if (builder.Environment.EnvironmentName != "TestEnvironment" && string.IsNullOrEmpty(secretKey))
+if (string.IsNullOrEmpty(secretKey))
 {
     throw new InvalidOperationException("JwtSettings:SecretKey is required");
 }
