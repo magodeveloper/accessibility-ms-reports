@@ -167,22 +167,14 @@ using (var scope = app.Services.CreateScope())
     var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
     var environment = env.EnvironmentName;
 
-    // Lista de entornos que usan InMemory database
-    var testEnvironments = new[] { "TestEnvironment", "Testing", "Test", "UnitTest", "IntegrationTest", "Development" };
-
-    if (testEnvironments.Contains(environment, StringComparer.OrdinalIgnoreCase))
+    if (environment != "TestEnvironment")
     {
-        // Para entornos de test/desarrollo con InMemory, solo crear la base de datos
-        await db.Database.EnsureCreatedAsync();
-    }
-    else
-    {
-        // Para producción con MySQL, ejecutar migraciones
+        // Para producción/desarrollo con MySQL, ejecutar migraciones
         await db.Database.MigrateAsync();
     }
+    // Para TestEnvironment, InMemory DB se crea automáticamente
 }
 
-// Configuración de localización
 var supportedCultures = new[] { "es", "en" };
 var localizationOptions = new RequestLocalizationOptions()
     .SetDefaultCulture("es")

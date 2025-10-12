@@ -65,7 +65,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
 
         // Assert
         entityType.Should().NotBeNull();
-        entityType!.GetTableName().Should().Be("reports"); // InMemory uses lowercase
+        entityType!.GetTableName().Should().Be("REPORTS");
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public class ReportsDbContextConsolidatedTests : IDisposable
 
         // Assert
         entityType.Should().NotBeNull();
-        entityType!.GetTableName().Should().Be("history"); // InMemory uses lowercase
+        entityType!.GetTableName().Should().Be("HISTORY");
     }
 
     [Fact]

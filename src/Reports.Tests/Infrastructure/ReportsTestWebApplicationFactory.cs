@@ -14,6 +14,8 @@ namespace Reports.Tests.Infrastructure
 {
     public class ReportsTestWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
     {
+        private readonly string _databaseName = $"TestDatabase_{Guid.NewGuid()}";
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("TestEnvironment");
@@ -65,7 +67,7 @@ namespace Reports.Tests.Infrastructure
 
                 // Configurar explícitamente el DbContext para usar InMemory
                 services.AddDbContext<ReportsDbContext>(options =>
-                    options.UseInMemoryDatabase("TestDatabase"));
+                    options.UseInMemoryDatabase(_databaseName));
 
                 // Crear la base de datos en memoria
                 var serviceProvider = services.BuildServiceProvider();

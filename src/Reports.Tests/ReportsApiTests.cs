@@ -121,6 +121,9 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
     {
         var client = _factory.CreateAuthenticatedClient();
 
+        // Clean up first to ensure empty state
+        await client.DeleteAsync("/api/history/all");
+
         var response = await client.GetAsync("/api/history");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -137,12 +140,16 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
     [Fact]
     public async Task CreateAndDelete_History_Success()
     {
+        var client = _factory.CreateAuthenticatedClient();
+
+        // Clean up first to ensure clean state
+        await client.DeleteAsync("/api/history/all");
+
         var dto = new HistoryDto
         {
             UserId = 1,
             AnalysisId = 1
         };
-        var client = _factory.CreateAuthenticatedClient();
 
         var createResp = await client.PostAsJsonAsync("/api/history", dto);
         createResp.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -251,13 +258,17 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
     [Fact]
     public async Task DeleteAllHistory_AfterCreate_Success()
     {
-        // Create a history record first
+        var client = _factory.CreateAuthenticatedClient();
+
+        // Clean up first
+        await client.DeleteAsync("/api/history/all");
+
+        // Create a history record
         var dto = new HistoryDto
         {
             UserId = 3,
             AnalysisId = 3
         };
-        var client = _factory.CreateAuthenticatedClient();
 
         var createResp = await client.PostAsJsonAsync("/api/history", dto);
         createResp.StatusCode.Should().Be(HttpStatusCode.OK);

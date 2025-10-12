@@ -14,7 +14,7 @@ public class ReportsDbContext : DbContext
     {
         modelBuilder.Entity<Report>(entity =>
         {
-            entity.ToTable("reports");
+            entity.ToTable("REPORTS");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AnalysisId).HasColumnName("analysis_id");
@@ -26,14 +26,14 @@ public class ReportsDbContext : DbContext
                         v.Substring(0, 1).ToUpper() + v.Substring(1).ToLower()
                     )
                 );
-            entity.Property(e => e.FilePath).HasColumnName("file_path").IsRequired(false);
+            entity.Property(e => e.FilePath).HasColumnName("file_path").IsRequired();
             entity.Property(e => e.GenerationDate).HasColumnName("generation_date");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
         });
         modelBuilder.Entity<History>(entity =>
         {
-            entity.ToTable("history");
+            entity.ToTable("HISTORY");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.UserId).HasColumnName("user_id");

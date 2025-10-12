@@ -14,6 +14,8 @@ namespace Reports.Tests.Infrastructure;
 
 public class TestWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
 {
+    private readonly string _databaseName = $"TestDatabase_{Guid.NewGuid()}";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Establecer el entorno ANTES de que se llame a ServiceRegistration
@@ -42,6 +44,20 @@ public class TestWebApplicationFactory<TStartup> : WebApplicationFactory<TStartu
 
         builder.ConfigureServices(services =>
         {
+            // Buscar y remover TODOS los DbContext relacionados
+            var descriptors = services.Where(d => d.ServiceType.Name.Contains("DbContext") ||
+                                                 d.ServiceType == typeof(DbContextOptions<ReportsDbContext>) ||
+                                                 d.ServiceType == typeof(ReportsDbContext)).ToList();
+
+            foreach (var descriptor in descriptors)
+            {
+                services.Remove(descriptor);
+            }
+
+            // Configurar explícitamente el DbContext para usar InMemory con nombre único
+            services.AddDbContext<ReportsDbContext>(options =>
+                options.UseInMemoryDatabase(_databaseName));
+
             // NO intentar remover servicios de autenticación ya registrados
             // En su lugar, agregar una autenticación de prueba con menor prioridad
             // que sobrescribirá la autenticación JWT

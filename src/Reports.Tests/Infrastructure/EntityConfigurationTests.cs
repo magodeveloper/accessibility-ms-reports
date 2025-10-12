@@ -40,7 +40,7 @@ public class EntityConfigurationTests : IDisposable
 
         var filePathProperty = entityType.FindProperty(nameof(Report.FilePath));
         filePathProperty.Should().NotBeNull();
-        filePathProperty!.IsNullable.Should().BeTrue(); // FilePath is nullable
+        filePathProperty!.IsNullable.Should().BeFalse(); // FilePath is required in database
 
         var generationDateProperty = entityType.FindProperty(nameof(Report.GenerationDate));
         generationDateProperty.Should().NotBeNull();
@@ -78,7 +78,7 @@ public class EntityConfigurationTests : IDisposable
 
         // Assert
         entityType.Should().NotBeNull();
-        entityType!.GetTableName().Should().Be("reports");
+        entityType!.GetTableName().Should().Be("REPORTS");
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public class EntityConfigurationTests : IDisposable
 
         // Assert
         entityType.Should().NotBeNull();
-        entityType!.GetTableName().Should().Be("history");
+        entityType!.GetTableName().Should().Be("HISTORY");
     }
 
     [Fact]

@@ -27,7 +27,7 @@ public class ProgramIntegrationTests : IClassFixture<WebApplicationFactory<Progr
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseEnvironment("IntegrationTest");
+            builder.UseEnvironment("TestEnvironment");
 
             builder.ConfigureAppConfiguration((context, config) =>
             {
@@ -427,7 +427,7 @@ public class ProgramIntegrationTests : IClassFixture<WebApplicationFactory<Progr
 
         // Assert
         env.IsDevelopment().Should().BeFalse();
-        env.EnvironmentName.Should().Be("IntegrationTest");
+        env.EnvironmentName.Should().Be("TestEnvironment");
     }
 
     // ===== HELPER METHODS =====
