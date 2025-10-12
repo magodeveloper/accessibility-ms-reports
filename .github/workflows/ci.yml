@@ -24,7 +24,10 @@ jobs:
         ports:
           - 3308:3306 # Expone el puerto 3306 del contenedor en el 3308 del host
         options: >-
-          --health-cmd="mysqladmin ping -h localhost -prootpass" --health-interval=10s --health-timeout=5s --health-retries=10
+          --health-cmd="mysqladmin ping -h localhost -prootpass" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=10
     env:
       ConnectionStrings__Default: server=127.0.0.1;port=3308;database=reportsdb;user=devuser;password=devpass;TreatTinyAsBoolean=false
       ASPNETCORE_ENVIRONMENT: Development
