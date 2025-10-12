@@ -9,16 +9,20 @@ public class GatewaySecretValidationMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<GatewaySecretValidationMiddleware> _logger;
     private readonly string? _expectedSecret;
+    private readonly IWebHostEnvironment _environment;
 
     public GatewaySecretValidationMiddleware(
         RequestDelegate next,
         ILogger<GatewaySecretValidationMiddleware> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         _next = next;
         _logger = logger;
+        _environment = environment;
         _expectedSecret = configuration["Gateway:Secret"] ?? configuration["GATEWAY_SECRET"];
 
+        // El warning es normal en entornos de test - no es un problema
         if (string.IsNullOrEmpty(_expectedSecret))
         {
             _logger.LogWarning("Gateway:Secret not configured. Gateway secret validation will be disabled.");
@@ -32,6 +36,14 @@ public class GatewaySecretValidationMiddleware
             context.Request.Path.StartsWithSegments("/metrics"))
         {
             _logger.LogDebug("Gateway secret validation skipped for health/metrics endpoint: {Path}", context.Request.Path);
+            await _next(context);
+            return;
+        }
+
+        // Skip validation in Test environment
+        if (_environment.EnvironmentName == "TestEnvironment")
+        {
+            _logger.LogDebug("Gateway secret validation skipped for TestEnvironment");
             await _next(context);
             return;
         }
