@@ -54,6 +54,8 @@ jobs:
           exit 1
         shell: bash
       - name: Run tests with coverage
+        env:
+          ASPNETCORE_ENVIRONMENT: TestEnvironment
         run: dotnet test src/Reports.Tests/Reports.Tests.csproj --no-build --configuration Release --collect:"XPlat Code Coverage"
       - name: Report coverage
         uses: codecov/codecov-action@v4
