@@ -101,13 +101,14 @@ public class ReportService : IReportService
     public async Task<bool> DeleteAllAsync()
     {
         var entities = await _db.Reports.ToListAsync();
-        if (!entities.Any())
+        if (entities.Any())
         {
-            return false;
+            _db.Reports.RemoveRange(entities);
+            await _db.SaveChangesAsync();
         }
 
-        _db.Reports.RemoveRange(entities);
-        await _db.SaveChangesAsync();
+        // Siempre retorna true para mantener idempotencia
+        // La operación "eliminar todos los registros" es exitosa incluso si no había nada que eliminar
         return true;
     }
 

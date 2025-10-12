@@ -283,13 +283,13 @@ public class ReportServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task DeleteAllAsync_WithNoReports_ShouldReturnFalse()
+    public async Task DeleteAllAsync_WithNoReports_ShouldReturnTrue()
     {
-        // Act
+        // Act - DeleteAll is idempotent and should return true even when there are no reports
         var result = await _service.DeleteAllAsync();
 
         // Assert
-        result.Should().BeFalse();
+        result.Should().BeTrue();
     }
 
     [Fact]

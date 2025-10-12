@@ -220,17 +220,17 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
     }
 
     [Fact]
-    public async Task DeleteAllReports_WhenEmpty_ShouldReturn404()
+    public async Task DeleteAllReports_WhenEmpty_ShouldReturnOk()
     {
         // Arrange
         var client = _factory.CreateAuthenticatedClient();
         _factory.ResetDatabase();
 
-        // Act
+        // Act - DeleteAll is idempotent and should return 200 OK even when empty
         var response = await client.DeleteAsync("/api/report/all");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]

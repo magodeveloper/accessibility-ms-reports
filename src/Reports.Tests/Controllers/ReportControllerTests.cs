@@ -278,15 +278,15 @@ public class ReportControllerTests : IDisposable
     }
 
     [Fact]
-    public async Task DeleteAll_WhenEmpty_ShouldReturnNotFound()
+    public async Task DeleteAll_WhenEmpty_ShouldReturnOk()
     {
-        // Act
+        // Act - DeleteAll is idempotent and should return OK even when empty
         var result = await _controller.DeleteAll();
 
         // Assert
-        result.Should().BeOfType<NotFoundObjectResult>();
-        var notFoundResult = result as NotFoundObjectResult;
-        notFoundResult!.StatusCode.Should().Be(404);
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        okResult!.StatusCode.Should().Be(200);
     }
 
     [Theory]

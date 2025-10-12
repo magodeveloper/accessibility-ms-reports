@@ -91,15 +91,16 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
     }
 
     [Fact]
-    public async Task DeleteAllReports_WhenEmpty_NotFound()
+    public async Task DeleteAllReports_WhenEmpty_ReturnsOk()
     {
         var client = _factory.CreateAuthenticatedClient();
         // First, ensure we delete any existing reports
-        await client.DeleteAsync("/api/report/all");
+        var firstDeleteResponse = await client.DeleteAsync("/api/report/all");
+        firstDeleteResponse.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NotFound);
 
-        // Now try to delete all when empty
+        // Now try to delete all when empty - should still return OK (idempotent operation)
         var response = await client.DeleteAsync("/api/report/all");
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
