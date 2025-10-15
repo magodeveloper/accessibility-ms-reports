@@ -40,8 +40,11 @@ RUN dotnet publish ./src/Reports.Api/Reports.Api.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 
-# Crear usuario no-root para seguridad
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Instalar curl para health checks (necesario para Docker HEALTHCHECK) y crear usuario no-root para seguridad
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -r appuser && useradd -r -g appuser appuser
 
 # Copiar binarios publicados desde stage de build
 COPY --from=build /app/publish .
