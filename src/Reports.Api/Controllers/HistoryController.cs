@@ -106,12 +106,13 @@ public class HistoryController : ControllerBase
     /// <param name="dto">Datos del historial a crear</param>
     /// <response code="200">Historial creado exitosamente</response>
     /// <response code="400">Datos inválidos</response>    
+    [AllowAnonymous]  // Permitir acceso desde Middleware con headers X-User-*
     [HttpPost]
     [ProducesResponseType(typeof(HistoryDto), 200)]
     [ProducesResponseType(400)]
     public async Task<IActionResult> Create([FromBody] HistoryDto dto)
     {
-        // Si el usuario no está autenticado, retornar Unauthorized
+        // Si el usuario no está autenticado (no hay X-User-Id), retornar Unauthorized
         if (!_userContext.IsAuthenticated)
         {
             return Unauthorized(new { message = "Authentication required" });

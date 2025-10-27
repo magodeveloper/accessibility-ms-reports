@@ -1,21 +1,28 @@
 using Xunit;
 using System.Net;
+using System.Text.Json;
 using FluentAssertions;
 using System.Net.Http.Json;
 using Reports.Domain.Entities;
 using Reports.Application.Dtos;
 using Reports.Tests.Infrastructure;
+using System.Text.Json.Serialization;
 
 namespace Reports.Tests;
 
 public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.Api.Program>>
 {
     private readonly TestWebApplicationFactory<Reports.Api.Program> _factory;
+    private readonly JsonSerializerOptions _jsonOptions;
 
     public ReportsApiTests(TestWebApplicationFactory<Reports.Api.Program> factory)
     {
         _factory = factory;
-
+        _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter() }
+        };
     }
 
     [Fact]
@@ -72,7 +79,7 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
 
         var createResp = await client.PostAsJsonAsync("/api/report", dto);
         createResp.StatusCode.Should().Be(HttpStatusCode.OK);
-        var created = await createResp.Content.ReadFromJsonAsync<ResponseWithData<ReportDto>>();
+        var created = await createResp.Content.ReadFromJsonAsync<ResponseWithData<ReportDto>>(_jsonOptions);
         created.Should().NotBeNull();
         created!.Data.Id.Should().BeGreaterThan(0);
 
@@ -202,7 +209,7 @@ public class ReportsApiTests : IClassFixture<TestWebApplicationFactory<Reports.A
         // Get all reports
         var getAllResp = await client.GetAsync("/api/report");
         getAllResp.StatusCode.Should().Be(HttpStatusCode.OK);
-        var allReports = await getAllResp.Content.ReadFromJsonAsync<ResponseWithData<IEnumerable<ReportDto>>>();
+        var allReports = await getAllResp.Content.ReadFromJsonAsync<ResponseWithData<IEnumerable<ReportDto>>>(_jsonOptions);
         allReports.Should().NotBeNull();
         allReports!.Data.Should().NotBeEmpty();
     }

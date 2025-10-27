@@ -69,9 +69,10 @@ public class GatewaySecretValidationMiddleware
         }
 
         // Validate the secret
-        if (gatewaySecret != _expectedSecret)
+        if (gatewaySecret.ToString() != _expectedSecret)
         {
-            _logger.LogWarning("Request rejected: Invalid X-Gateway-Secret header. Path: {Path}", context.Request.Path);
+            _logger.LogWarning("Request rejected: Invalid X-Gateway-Secret header. Path: {Path}, Received: {Received}, Expected: {Expected}",
+                context.Request.Path, gatewaySecret.ToString(), _expectedSecret);
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             await context.Response.WriteAsJsonAsync(new
             {

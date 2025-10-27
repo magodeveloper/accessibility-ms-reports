@@ -133,6 +133,7 @@ public class ReportController : ControllerBase
     /// <param name="dto">Datos del informe a crear</param>
     /// <response code="200">Informe creado exitosamente</response>
     /// <response code="400">Datos inválidos</response>
+    [AllowAnonymous]  // Permitir acceso desde Middleware con headers X-User-*
     [HttpPost]
     [ProducesResponseType(typeof(ReportDto), 200)]
     [ProducesResponseType(400)]

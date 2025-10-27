@@ -31,7 +31,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi(); // .NET 9
 
 // Registrar FluentValidation y controladores MVC
-builder.Services.AddControllers(); // Controladores
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Permitir enums como strings en JSON (e.g., "json" en lugar de 2)
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 builder.Services.AddFluentValidationAutoValidation();
 

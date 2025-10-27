@@ -41,10 +41,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       ConnectionStrings__Default: "server=mysql;port=3306;database=${DB_NAME:-reportsdb};user=${DB_USER:-msuser};password=${DB_PASSWORD:-RptApp2025SecurePass};TreatTinyAsBoolean=false"
-      JwtSettings__SecretKey: ${JwtSettings__SecretKey}
-      JwtSettings__Issuer: ${JwtSettings__Issuer:-AccessibilityReportsAPI}
-      JwtSettings__Audience: ${JwtSettings__Audience:-AccessibilityClients}
-      JwtSettings__ExpiryHours: ${JwtSettings__ExpiryHours:-24}
+      Gateway__Secret: ${GATEWAY_SECRET:-VGhpc0lzQVNlY3JldEtleUZvckdhdGV3YXkyMDI0}
     ports:
       - "${API_HOST_PORT:-8083}:8083"
     networks:
