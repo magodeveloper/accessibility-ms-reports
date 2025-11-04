@@ -41,6 +41,10 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       ConnectionStrings__Default: "server=mysql;port=3306;database=${DB_NAME:-reportsdb};user=${DB_USER:-msuser};password=${DB_PASSWORD:-RptApp2025SecurePass};TreatTinyAsBoolean=false"
+      JwtSettings__SecretKey: ${JwtSettings__SecretKey:-9b3e7ER@S^glvxPWKX8nN?DTqtrd%Yj!oVIfh+BG&piHwZz6ky4Q52MumOFA-Lc0}
+      JwtSettings__Issuer: ${JwtSettings__Issuer:-https://accessibility.company.com}
+      JwtSettings__Audience: ${JwtSettings__Audience:-https://accessibility.company.com}
+      JwtSettings__ExpiryHours: ${JwtSettings__ExpiryHours:-24}
       Gateway__Secret: ${GATEWAY_SECRET:-VGhpc0lzQVNlY3JldEtleUZvckdhdGV3YXkyMDI0}
     ports:
       - "${API_HOST_PORT:-8083}:8083"
@@ -72,3 +76,4 @@ networks:
 # Para usar un archivo de entorno específico:
 #   docker compose --env-file .env.development up
 #   docker compose --env-file .env.production up
+
