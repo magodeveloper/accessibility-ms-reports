@@ -62,9 +62,9 @@ public class ReportManagementIntegrationTests : IClassFixture<ReportsTestWebAppl
         var deleteAllResponse = await client.DeleteAsync("/api/report/all");
         deleteAllResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // Verify deletion
+        // Verify deletion - GetAll should return 200 OK with empty list after deletion
         var verifyDeleteResponse = await client.GetAsync("/api/report");
-        verifyDeleteResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        verifyDeleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]

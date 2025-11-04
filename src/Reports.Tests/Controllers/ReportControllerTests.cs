@@ -54,10 +54,10 @@ public class ReportControllerTests : IDisposable
         // Act
         var result = await _controller.GetAll();
 
-        // Assert
-        result.Should().BeOfType<NotFoundObjectResult>();
-        var notFoundResult = result as NotFoundObjectResult;
-        notFoundResult!.StatusCode.Should().Be(404);
+        // Assert - GetAll should return 200 OK with empty list, not 404
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        okResult!.StatusCode.Should().Be(200);
     }
 
     [Fact]
@@ -345,9 +345,9 @@ public class ReportControllerTests : IDisposable
         var deleteResult = await _controller.Delete(createdReport.Id);
         deleteResult.Should().BeOfType<OkObjectResult>();
 
-        // Verify deletion
+        // Verify deletion - GetAll should return 200 OK with empty list after deletion
         var getAllAfterDeleteResult = await _controller.GetAll();
-        getAllAfterDeleteResult.Should().BeOfType<NotFoundObjectResult>();
+        getAllAfterDeleteResult.Should().BeOfType<OkObjectResult>();
     }
 
     [Fact]
