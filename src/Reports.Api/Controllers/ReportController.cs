@@ -25,11 +25,9 @@ public class ReportController : ControllerBase
     /// <summary>
     /// Obtiene todos los informes.
     /// </summary>
-    /// <response code="200">Lista completa de informes</response>
-    /// <response code="404">No se encontraron informes</response>
+    /// <response code="200">Lista completa de informes (puede estar vacía)</response>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<ReportDto>), 200)]
-    [ProducesResponseType(404)]
     public async Task<IActionResult> GetAll()
     {
         using (ReportsMetrics.MeasureQuery("get_all"))
@@ -44,11 +42,11 @@ public class ReportController : ControllerBase
             ReportsMetrics.RecordQuery("get_all");
 
             var lang = LanguageHelper.GetRequestLanguage(Request);
-            if (reports == null || !reports.Any())
-            {
-                return NotFound(new { message = Reports.Application.Localization.Get("Error_ReportNotFound", lang) });
-            }
-            return Ok(new { message = Reports.Application.Localization.Get("Success_ReportList", lang), data = reports });
+            var message = (reports == null || !reports.Any())
+                ? Reports.Application.Localization.Get("Info_NoReportsFound", lang)
+                : Reports.Application.Localization.Get("Success_ReportList", lang);
+
+            return Ok(new { message = message, data = reports ?? Enumerable.Empty<ReportDto>() });
         }
     }
 

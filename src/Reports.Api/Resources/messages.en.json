@@ -2,6 +2,7 @@
   "Error_ReportNotFound": "Report not found.",
   "Error_HistoryNotFound": "History not found.",
   "Error_InternalServer": "An unexpected internal error has occurred.",
+  "Info_NoReportsFound": "No reports available.",
   "Success_ReportCreated": "Report created successfully.",
   "Success_ReportDeleted": "Report deleted successfully.",
   "Success_ReportList": "Report list retrieved successfully.",
