@@ -112,14 +112,18 @@ public class HistoryController : ControllerBase
     [ProducesResponseType(400)]
     public async Task<IActionResult> Create([FromBody] HistoryDto dto)
     {
-        // Si el usuario no está autenticado (no hay X-User-Id), retornar Unauthorized
+        // NOTA: La autenticación ya fue validada por el Gateway
+        // El Gateway agrega X-User-* headers que el UserContext usa
         if (!_userContext.IsAuthenticated)
         {
             return Unauthorized(new { message = "Authentication required" });
         }
 
-        // Usar el UserId del contexto autenticado (ignorar el del body)
-        dto.UserId = _userContext.UserId;
+        // Si está autenticado, usar el UserId del contexto, sino usar el del DTO
+        if (_userContext.IsAuthenticated)
+        {
+            dto.UserId = _userContext.UserId;
+        }
 
         var created = await _service.CreateAsync(dto);
         var lang = LanguageHelper.GetRequestLanguage(Request);

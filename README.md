@@ -1,7 +1,7 @@
 # 📊 Accessibility Reports Service
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
-[![Tests](https://img.shields.io/badge/tests-445%2F458-brightgreen)](test-dashboard.html)
+[![Tests](https://img.shields.io/badge/tests-434%2F437-brightgreen)](test-dashboard.html)
 [![Coverage](https://img.shields.io/badge/coverage-94.12%25-brightgreen)](coverage-report/index.html)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
@@ -212,13 +212,19 @@ curl -X POST http://localhost:5003/api/report \
 | GET    | `/health/ready` | Readiness probe      |
 | GET    | `/health/live`  | Liveness probe       |
 
-**Total: 16 endpoints disponibles**
+### 📊 Metrics (/metrics)
+
+| Método | Endpoint   | Descripción                |
+| ------ | ---------- | -------------------------- |
+| GET    | `/metrics` | Métricas de Prometheus.NET |
+
+**Total: 17 endpoints disponibles**
 
 ## 🧪 Testing
 
 ### Estado de Cobertura
 
-**Estado General:** ✅ 432/444 tests exitosos (97.3%)  
+**Estado General:** ✅ 434/437 tests exitosos (99.3%)  
 **Cobertura Total:** 94.12% (769/817 líneas cubiertas)
 
 | Capa                       | Cobertura | Tests            | Estado |
@@ -238,8 +244,8 @@ curl -X POST http://localhost:5003/api/report \
 
 - **Cobertura de líneas:** 94.12% (769/817)
 - **Cobertura de ramas:** 81.87%
-- **Tiempo de ejecución:** ~20s para 444 tests
-- **Tasa de éxito:** 97.3% (432/444)
+- **Tiempo de ejecución:** ~2s para 437 tests
+- **Tasa de éxito:** 99.3% (434/437, 3 skipped)
 
 ### Comandos de Testing
 
@@ -282,9 +288,390 @@ Start-Process .\test-dashboard.html
 - Gestión de historial de operaciones
 - Eliminación en cascada
 
-## 🐳 Deployment
+## � Observabilidad & Métricas
 
-### Docker
+### Prometheus Metrics
+
+El microservicio expone métricas en `/metrics` usando **Prometheus.NET**.
+
+#### Métricas HTTP Estándar
+
+```promql
+# Request rate
+rate(http_requests_received_total[5m])
+
+# Request duration
+histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+
+# Requests in progress
+http_requests_in_progress
+```
+
+#### Métricas de Negocio
+
+**Reportes:**
+
+```csharp
+// Contador de reportes generados
+reports_created_total{format="PDF|HTML|JSON|CSV"}
+
+// Tamaño de reportes generados
+reports_size_bytes{format="PDF|HTML|JSON|CSV"}
+
+// Histograma de tiempo de generación
+report_generation_duration_seconds{format="PDF|HTML|JSON|CSV"}
+
+// Reportes activos
+reports_active_total
+
+// Tasa de éxito en generación
+reports_success_rate{format="PDF|HTML|JSON|CSV"}
+```
+
+**Historial:**
+
+```csharp
+// Entradas de historial creadas
+history_entries_created_total{action="CREATE|UPDATE|DELETE"}
+
+// Historial por usuario
+history_entries_by_user{user_id="X"}
+
+// Historial por análisis
+history_entries_by_analysis{analysis_id="X"}
+```
+
+**Database:**
+
+```csharp
+// Queries ejecutadas
+db_queries_total{operation="SELECT|INSERT|UPDATE|DELETE"}
+
+// Duración de queries
+db_query_duration_seconds{table="reports|history"}
+
+// Conexiones activas
+db_connections_active
+```
+
+### Health Checks
+
+Endpoints disponibles:
+
+- **`/health`** - Health check completo (incluye DB)
+- **`/health/live`** - Liveness probe (sin dependencias)
+- **`/health/ready`** - Readiness probe (con verificación DB)
+
+Ejemplo de uso:
+
+```bash
+curl http://localhost:5003/health
+# Response: {"status":"Healthy","totalDuration":"00:00:00.0234567"}
+```
+
+La configuración incluye verificación de conexión a MySQL con timeout de 30 segundos.
+
+### Logging con Serilog
+
+El proyecto usa **Serilog** para logging estructurado:
+
+- **Console**: Output formateado para desarrollo
+- **File**: Logs rotativos diarios (retención 7 días)
+- **Niveles**: Information (default), Warning (Microsoft/EF Core)
+
+Ejemplos de logs estructurados:
+
+```csharp
+_logger.LogInformation("Report generated: {ReportId}, size: {Size} bytes", reportId, size);
+_logger.LogError(ex, "Failed to generate report for analysis {AnalysisId}", analysisId);
+```
+
+### Grafana Dashboards
+
+**Queries PromQL principales:**
+
+```promql
+# Tasa de generación de reportes por formato
+sum(rate(reports_created_total[5m])) by (format)
+
+# Tiempo de generación P95
+histogram_quantile(0.95, sum(rate(report_generation_duration_seconds_bucket[5m])) by (format, le))
+
+# Request rate por endpoint
+sum(rate(http_requests_received_total{job="reports-api"}[5m])) by (method, endpoint)
+
+# Error rate 5xx
+sum(rate(http_requests_received_total{code=~"5.."}[5m])) / sum(rate(http_requests_received_total[5m])) * 100
+```
+
+### Alertas Recomendadas
+
+```yaml
+# Alta tasa de errores (>5%)
+- alert: HighReportGenerationErrorRate
+  expr: (sum(rate(reports_created_total{status="error"}[5m])) / sum(rate(reports_created_total[5m]))) > 0.05
+  for: 5m
+
+# Generación lenta (P95 > 10s)
+- alert: SlowReportGeneration
+  expr: histogram_quantile(0.95, rate(report_generation_duration_seconds_bucket[5m])) > 10
+  for: 5m
+
+# Database no disponible
+- alert: DatabaseDown
+  expr: up{job="reports-mysql"} == 0
+  for: 1m
+```
+
+## 🔒 Arquitectura de Seguridad
+
+### Flujo de Autenticación
+
+```
+┌─────────────┐         ┌──────────────┐         ┌──────────────┐
+│   Cliente   │         │   Gateway    │         │   Reports    │
+│   (JWT)     │         │   (Port 80)  │         │  (Port 5003) │
+└──────┬──────┘         └──────┬───────┘         └──────┬───────┘
+       │                       │                        │
+       │ 1. POST /api/report   │                        │
+       │    Authorization:     │                        │
+       │    Bearer eyJ...      │                        │
+       ├──────────────────────>│                        │
+       │                       │                        │
+       │                       │ 2. Valida JWT          │
+       │                       │    Extrae claims:      │
+       │                       │    - UserId            │
+       │                       │    - Email             │
+       │                       │    - Role              │
+       │                       │                        │
+       │                       │ 3. Agrega headers:     │
+       │                       │    X-User-Id: 123      │
+       │                       │    X-User-Email: ...   │
+       │                       │    X-User-Role: admin  │
+       │                       │    X-Gateway-Secret    │
+       │                       ├───────────────────────>│
+       │                       │                        │
+       │                       │                    4. Middleware
+       │                       │                       Valida Gateway
+       │                       │                       Secret ✓
+       │                       │                        │
+       │                       │                    5. Middleware
+       │                       │                       Extrae headers
+       │                       │                       Popula UserContext
+       │                       │                        │
+       │                       │                    6. Controller
+       │                       │                       if (!IsAuthenticated)
+       │                       │                       return Unauthorized();
+       │                       │                        │
+       │                       │                    7. Ejecuta lógica
+       │                       │                       de negocio
+       │                       │                        │
+       │                       │ 8. Response 201       │
+       │                       │<───────────────────────┤
+       │                       │                        │
+       │ 9. Response 201       │                        │
+       │<──────────────────────┤                        │
+       │                       │                        │
+```
+
+### Stack de Middleware
+
+```csharp
+app.UseHttpsRedirection();                          // 1. HTTPS enforcement
+app.UseRouting();                                   // 2. Routing
+app.UseAuthentication();                            // 3. JWT validation ([AllowAnonymous] permite bypass)
+app.UseMiddleware<GatewaySecretValidationMiddleware>(); // 4. Gateway secret validation
+app.UseMiddleware<UserContextMiddleware>();         // 5. User context population
+app.UseAuthorization();                             // 6. Authorization policies
+app.MapControllers();                               // 7. Endpoint execution
+app.MapHealthChecks("/health");                     // 8. Health checks
+app.MapMetrics("/metrics");                         // 9. Prometheus metrics
+```
+
+**Orden crítico:**
+
+1. **UseAuthentication()** valida JWT pero `[AllowAnonymous]` permite bypass
+2. **GatewaySecretValidationMiddleware** valida comunicación entre servicios
+3. **UserContextMiddleware** extrae headers y popula contexto de usuario
+4. **Controller validation** verifica `if (!_userContext.IsAuthenticated)`
+
+### IUserContext Interface
+
+La interfaz `IUserContext` proporciona acceso al contexto del usuario autenticado:
+
+```csharp
+public interface IUserContext
+{
+    int UserId { get; }
+    string Email { get; }
+    string Role { get; }
+    bool IsAuthenticated { get; }  // true cuando UserId > 0
+    bool IsAdmin { get; }           // true cuando Role == "admin"
+}
+```
+
+**Ubicación:** `src/Reports.Application/Services/UserContext/`
+
+### UserContextMiddleware
+
+Middleware que extrae información del usuario de los headers del Gateway:
+
+**Prioridades de autenticación:**
+
+1. **Headers del Gateway** (`X-User-*`) - Producción
+2. **Claims del JWT** - Acceso directo (sin Gateway)
+3. **Sin autenticación** - UserId = 0, IsAuthenticated = false
+
+**Ubicación:** `src/Reports.Api/Middleware/UserContextMiddleware.cs`### Patrón de Autenticación en Controllers
+
+Los controllers utilizan `[AllowAnonymous]` con validación custom:
+
+```csharp
+[AllowAnonymous]  // Bypass JWT framework, permite headers del Gateway
+[HttpPost]
+public async Task<IActionResult> Create([FromBody] ReportCreateDto dto)
+{
+    if (!_userContext.IsAuthenticated)  // Validación custom
+        return Unauthorized(new { message = "Authentication required" });
+
+    var result = await _service.CreateAsync(dto, _userContext.UserId);
+    return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+}
+```
+
+**¿Por qué `[AllowAnonymous]`?**
+
+- Permite llamadas del Gateway sin JWT directo
+- Gateway valida JWT y propaga headers `X-User-*`
+- Middleware extrae headers y popula `UserContext`
+- Controller valida `IsAuthenticated` (true cuando UserId > 0)
+- Facilita testing con mocks
+
+### Flujos de Autenticación
+
+**Producción (vía Gateway):**
+
+```
+Gateway valida JWT → Agrega X-User-* headers → Middleware extrae headers →
+UserId = 123 → IsAuthenticated = true → Controller permite acceso ✓
+```
+
+**Unit Tests:**
+
+```csharp
+var mockUserContext = new Mock<IUserContext>();
+mockUserContext.Setup(x => x.IsAuthenticated).Returns(false);
+// Test verifica que retorna Unauthorized ✓
+```
+
+**Integration Tests:**
+
+```csharp
+client.DefaultRequestHeaders.Add("X-User-Id", "1");
+client.DefaultRequestHeaders.Add("X-User-Email", "test@test.com");
+// Middleware popula contexto → IsAuthenticated = true ✓
+```
+
+### Validación de Gateway Secret
+
+El middleware `GatewaySecretValidationMiddleware` valida la comunicación entre servicios:
+
+- Verifica header `X-Gateway-Secret` en todas las requests
+- Permite acceso sin validación a `/health` y `/metrics`
+- Retorna `403 Forbidden` si el secret no coincide
+
+**Ubicación:** `src/Reports.Api/Middleware/GatewaySecretValidationMiddleware.cs`
+
+### Configuración de JWT
+
+**appsettings.json:**
+
+```json
+{
+  "JwtSettings": {
+    "SecretKey": "your-super-secret-key-min-64-chars",
+    "Issuer": "https://api.accessibility.company.com/users",
+    "Audience": "https://accessibility.company.com",
+    "ExpiryHours": 24
+  },
+  "GatewaySecret": "your-gateway-secret-key"
+}
+```
+
+⚠️ **IMPORTANTE:** La configuración JWT debe ser idéntica en todos los microservicios (Users, Reports, Analysis, Gateway).
+
+**Scripts de gestión:**
+
+```powershell
+# Generar secret key segura
+.\Generate-JwtSecretKey.ps1 -Type Special -Length 64
+
+# Validar configuración
+.\Validate-JwtConfig.ps1
+```
+
+## 🛠️ Scripts & Utilidades
+
+### PowerShell Scripts
+
+El proyecto incluye scripts para automatizar tareas comunes:
+
+**manage-tests.ps1** - Gestión completa de tests y cobertura
+
+```powershell
+# Ejecutar todos los tests con cobertura y abrir reporte
+.\manage-tests.ps1 -GenerateCoverage -OpenReport
+
+# Ejecutar solo tests unitarios o de integración
+.\manage-tests.ps1 -TestType Unit|Integration
+
+# Limpiar resultados anteriores
+.\manage-tests.ps1 -Clean
+```
+
+**Generate-JwtSecretKey.ps1** - Generación de claves JWT seguras
+
+```powershell
+# Generar clave segura (mínimo 64 caracteres)
+.\Generate-JwtSecretKey.ps1 -Type Special -Length 64
+```
+
+**Validate-JwtConfig.ps1** - Validación de configuración JWT
+
+```powershell
+# Verificar que la configuración JWT es correcta
+.\Validate-JwtConfig.ps1
+```
+
+### SQL Scripts
+
+**init-reports-db.sql** - Script de inicialización de base de datos
+
+Crea las tablas necesarias (`reports`, `history`) con sus índices y configuración UTF-8.
+
+```bash
+# Ejecutar script de inicialización
+mysql -u root -p < init-reports-db.sql
+```
+
+**init-test-databases.ps1** - Configuración de base de datos para tests
+
+```powershell
+# Crear base de datos de test
+.\init-test-databases.ps1
+```
+
+### Utilidades de Testing
+
+**test-dashboard.html** - Dashboard interactivo de resultados
+
+Visualiza métricas de tests, cobertura por capa, y tendencias históricas.
+
+```powershell
+Start-Process .\test-dashboard.html
+```
+
+## 🐳 Deployment
 
 ```dockerfile
 # Build image
@@ -432,7 +819,7 @@ curl -X GET http://localhost:8083/api/report \
 
 **Nota:** La configuración JWT debe ser **idéntica** en todos los microservicios (Users, Reports, Analysis) y el Gateway.
 
-## 🛠️ Stack Tecnológico
+## � Stack Tecnológico
 
 - **Runtime:** .NET 9.0
 - **Framework:** ASP.NET Core Web API
@@ -446,7 +833,7 @@ curl -X GET http://localhost:8083/api/report \
 - **Coverage:** Coverlet + ReportGenerator
 - **Container:** Docker + Docker Compose
 
-## � License
+## 📄 License
 
 **Proprietary Software License v1.0**
 
@@ -488,4 +875,4 @@ Email: fgiocl@outlook.com
 ---
 
 **Author:** Geovanny Camacho (fgiocl@outlook.com)  
-**Last Update:** 09/10/2025
+**Last Update:** 05/11/2025

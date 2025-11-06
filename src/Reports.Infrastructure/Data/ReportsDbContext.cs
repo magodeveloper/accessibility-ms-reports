@@ -1,5 +1,6 @@
 using Reports.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Reports.Infrastructure.Data;
 
@@ -12,6 +13,24 @@ public class ReportsDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Convertidor de DateTime para forzar DateTimeKind.Local
+        var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
+            v => DateTime.SpecifyKind(v, DateTimeKind.Local),
+            v => DateTime.SpecifyKind(v, DateTimeKind.Local)
+        );
+
+        // Aplicar el convertidor a todas las propiedades DateTime
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(dateTimeConverter);
+                }
+            }
+        }
+
         modelBuilder.Entity<Report>(entity =>
         {
             entity.ToTable("REPORTS");
