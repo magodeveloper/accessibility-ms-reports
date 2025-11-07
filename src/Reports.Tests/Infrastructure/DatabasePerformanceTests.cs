@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Reports.Tests.Helpers;
 using Reports.Domain.Entities;
 using Reports.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -96,8 +97,10 @@ public class DatabasePerformanceTests : IDisposable
         var remainingCount = await _context.Reports.CountAsync();
         remainingCount.Should().Be(50);
 
+        // El interceptor convierte las fechas a Ecuador time
+        var expectedUpdatedTime = DateTimeHelper.ToEcuadorTime(baseTime.AddHours(1));
         var allUpdated = await _context.Reports
-            .AllAsync(r => r.UpdatedAt == baseTime.AddHours(1));
+            .AllAsync(r => r.UpdatedAt == expectedUpdatedTime);
         allUpdated.Should().BeTrue();
     }
 

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Reports.Tests.Helpers;
 using Reports.Domain.Entities;
 using Reports.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -168,11 +169,14 @@ public class EntityConfigurationTests : IDisposable
         _context.Reports.Add(report);
         _context.SaveChanges();
 
-        // Assert
+        // Assert - El interceptor convierte UTC a Ecuador (-5 horas)
+        var expectedEcuadorTime = DateTimeHelper.ToEcuadorTime(testTime);
+        var expectedUpdatedTime = DateTimeHelper.ToEcuadorTime(testTime.AddHours(1));
+
         var savedReport = _context.Reports.First();
-        savedReport.GenerationDate.Should().Be(testTime);
-        savedReport.CreatedAt.Should().Be(testTime);
-        savedReport.UpdatedAt.Should().Be(testTime.AddHours(1));
+        savedReport.GenerationDate.Should().Be(expectedEcuadorTime);
+        savedReport.CreatedAt.Should().Be(expectedEcuadorTime);
+        savedReport.UpdatedAt.Should().Be(expectedUpdatedTime);
     }
 
     [Fact]

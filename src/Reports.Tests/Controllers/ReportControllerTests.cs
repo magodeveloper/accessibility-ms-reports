@@ -1,5 +1,6 @@
 using Moq;
 using FluentAssertions;
+using Reports.Tests.Helpers;
 using Reports.Application.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Reports.Api.Controllers;
@@ -552,8 +553,11 @@ public class ReportControllerTests : IDisposable
         _context.Reports.Add(report);
         await _context.SaveChangesAsync();
 
+        // El interceptor convierte la fecha a Ecuador, así que debemos buscar por esa fecha
+        var ecuadorDate = DateTimeHelper.ToEcuadorTime(testDate);
+
         // Act
-        var result = await _controller.GetByGenerationDate(testDate);
+        var result = await _controller.GetByGenerationDate(ecuadorDate);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
