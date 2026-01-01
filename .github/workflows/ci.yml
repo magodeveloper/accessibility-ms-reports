@@ -32,7 +32,7 @@ jobs:
       ConnectionStrings__Default: server=127.0.0.1;port=3308;database=reportsdb;user=devuser;password=devpass;TreatTinyAsBoolean=false
       ASPNETCORE_ENVIRONMENT: Development
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
@@ -82,7 +82,7 @@ jobs:
         options: >-
           --health-cmd="mysqladmin ping -h localhost -prootpass" --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build Docker image
         run: |
           IMAGE=ms-reports-ci:${{ github.sha }}
