@@ -37,7 +37,7 @@ RUN dotnet publish ./src/Reports.Api/Reports.Api.csproj \
     /p:UseAppHost=false
 
 # ============ STAGE 2: runtime ============
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 # Instalar curl para health checks (necesario para Docker HEALTHCHECK) y crear usuario no-root para seguridad
